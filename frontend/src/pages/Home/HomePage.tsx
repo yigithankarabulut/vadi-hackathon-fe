@@ -146,10 +146,10 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#FFFCEF]">
-      <header className="bg-white border-b border-[#659EB3]/20 shadow-sm">
+      <header className="bg-white border-b border-[#659EB3]/20 shadow-sm" role="banner">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-3">
-            <div className="bg-[#659EB3] p-2 rounded-lg">
+            <div className="bg-[#659EB3] p-2 rounded-lg" aria-hidden="true">
               <Plane className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -160,21 +160,21 @@ export default function HomePage() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6">
-        <div className="mb-6">
+      <main className="container mx-auto px-4 py-6" role="main">
+        <section className="mb-6" aria-label="İstatistikler">
           <StatsPanel
             totalAircraft={stats.total}
             activeAircraft={stats.active}
             warningAircraft={stats.warning}
             inactiveAircraft={stats.inactive}
           />
-        </div>
+        </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
+          <section className="lg:col-span-1" aria-labelledby="aircraft-list-title">
             <Card>
               <CardHeader>
-                <CardTitle className="text-[#659EB3]">Uçak Listesi</CardTitle>
+                <CardTitle id="aircraft-list-title" className="text-[#659EB3]">Uçak Listesi</CardTitle>
               </CardHeader>
               <CardContent className="max-h-[600px] overflow-y-auto">
                 <AircraftList
@@ -184,57 +184,65 @@ export default function HomePage() {
                 />
               </CardContent>
             </Card>
-          </div>
+          </section>
 
           <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-[#659EB3]">Canlı Harita</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[500px] rounded-lg overflow-hidden">
-                  <AircraftMap
-                    aircrafts={aircrafts}
-                    onAircraftClick={setSelectedAircraft}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <section aria-labelledby="map-title">
+              <Card>
+                <CardHeader>
+                  <CardTitle id="map-title" className="text-[#659EB3]">Canlı Harita</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[500px] rounded-lg overflow-hidden" role="img" aria-label="Uçak konumlarını gösteren canlı harita">
+                    <AircraftMap
+                      aircrafts={aircrafts}
+                      onAircraftClick={setSelectedAircraft}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
 
             <AlertPanel alerts={alerts} />
           </div>
         </div>
 
         {selectedAircraft && (
-          <div className="mt-6">
+          <section className="mt-6" aria-labelledby="selected-aircraft-title" role="region" aria-live="polite">
             <Card>
               <CardHeader>
-                <CardTitle className="text-[#659EB3]">Seçili Uçak Detayları - {selectedAircraft.name}</CardTitle>
+                <CardTitle id="selected-aircraft-title" className="text-[#659EB3]">Seçili Uçak Detayları - {selectedAircraft.name}</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <dl className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
-                    <p className="text-sm text-[#8B7B8E]">Araç No</p>
-                    <p className="text-lg font-bold text-[#659EB3]">{selectedAircraft.id}</p>
+                    <dt className="text-sm text-[#8B7B8E]">Araç No</dt>
+                    <dd className="text-lg font-bold text-[#659EB3]">{selectedAircraft.id}</dd>
                   </div>
                   <div>
-                    <p className="text-sm text-[#8B7B8E]">Yükseklik</p>
-                    <p className="text-lg font-bold text-[#659EB3]">{selectedAircraft.altitude} ft</p>
+                    <dt className="text-sm text-[#8B7B8E]">Yükseklik</dt>
+                    <dd className="text-lg font-bold text-[#659EB3]">
+                      <span aria-label={`${selectedAircraft.altitude} feet`}>{selectedAircraft.altitude} ft</span>
+                    </dd>
                   </div>
                   <div>
-                    <p className="text-sm text-[#8B7B8E]">Hız</p>
-                    <p className="text-lg font-bold text-[#659EB3]">{selectedAircraft.speed} kt</p>
+                    <dt className="text-sm text-[#8B7B8E]">Hız</dt>
+                    <dd className="text-lg font-bold text-[#659EB3]">
+                      <span aria-label={`${selectedAircraft.speed} knot`}>{selectedAircraft.speed} kt</span>
+                    </dd>
                   </div>
                   <div>
-                    <p className="text-sm text-[#8B7B8E]">Konum</p>
-                    <p className="text-sm font-medium text-[#659EB3]">
-                      {selectedAircraft.position[0].toFixed(4)}, {selectedAircraft.position[1].toFixed(4)}
-                    </p>
+                    <dt className="text-sm text-[#8B7B8E]">Konum</dt>
+                    <dd className="text-sm font-medium text-[#659EB3]">
+                      <span aria-label={`Enlem ${selectedAircraft.position[0].toFixed(4)}, Boylam ${selectedAircraft.position[1].toFixed(4)}`}>
+                        {selectedAircraft.position[0].toFixed(4)}, {selectedAircraft.position[1].toFixed(4)}
+                      </span>
+                    </dd>
                   </div>
-                </div>
+                </dl>
               </CardContent>
             </Card>
-          </div>
+          </section>
         )}
       </main>
     </div>

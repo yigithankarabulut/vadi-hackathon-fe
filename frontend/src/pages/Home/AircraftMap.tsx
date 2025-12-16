@@ -20,7 +20,10 @@ export function AircraftMap({ aircrafts, onAircraftClick }: AircraftMapProps) {
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
-    const map = L.map(mapContainerRef.current).setView([39.9334, 32.8597], 11);
+    const map = L.map(mapContainerRef.current, {
+      keyboard: true,
+      keyboardPanDelta: 80,
+    }).setView([39.9334, 32.8597], 11);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -91,20 +94,29 @@ export function AircraftMap({ aircrafts, onAircraftClick }: AircraftMapProps) {
           icon: createAircraftIcon(),
         });
 
+        const statusText = aircraft.status === 'active' ? 'Aktif' : aircraft.status === 'warning' ? 'Uyarı' : 'İnaktif';
         const popupContent = `
-          <div style="padding: 8px; min-width: 200px;">
-            <div style="font-weight: 600; margin-bottom: 8px;">${aircraft.name}</div>
-            <div style="font-size: 14px; color: #666;">
-              <div style="margin-bottom: 4px;">Yükseklik: ${aircraft.altitude} ft</div>
-              <div style="margin-bottom: 4px;">Hız: ${aircraft.speed} kt</div>
-              <div>Durum: ${aircraft.status === 'active' ? 'Aktif' : aircraft.status === 'warning' ? 'Uyarı' : 'İnaktif'}</div>
+          <div style="padding: 8px; min-width: 200px;" role="dialog" aria-label="Uçak bilgileri">
+            <div style="font-weight: 600; margin-bottom: 8px; color: #659EB3;">${aircraft.name}</div>
+            <div style="font-size: 14px; color: #8B7B8E;">
+              <div style="margin-bottom: 4px;"><span style="font-weight: 500;">Yükseklik:</span> ${aircraft.altitude} ft</div>
+              <div style="margin-bottom: 4px;"><span style="font-weight: 500;">Hız:</span> ${aircraft.speed} kt</div>
+              <div><span style="font-weight: 500;">Durum:</span> ${statusText}</div>
             </div>
           </div>
         `;
 
-        marker.bindPopup(popupContent);
+        marker.bindPopup(popupContent, {
+          closeButton: true,
+          autoClose: true,
+        });
         marker.on('click', () => {
           onAircraftClick?.(aircraft);
+        });
+        marker.on('keypress', (e: any) => {
+          if (e.originalEvent.key === 'Enter' || e.originalEvent.key === ' ') {
+            onAircraftClick?.(aircraft);
+          }
         });
         marker.addTo(map);
         markersRef.current.set(aircraft.id, marker);
@@ -142,6 +154,9 @@ export function AircraftMap({ aircrafts, onAircraftClick }: AircraftMapProps) {
       ref={mapContainerRef} 
       style={{ height: '100%', width: '100%' }}
       className="rounded-lg"
+      role="application"
+      aria-label="Uçak konumlarını gösteren interaktif harita. Klavye ile hareket için ok tuşlarını kullanın."
+      tabIndex={0}
     />
   );
 }

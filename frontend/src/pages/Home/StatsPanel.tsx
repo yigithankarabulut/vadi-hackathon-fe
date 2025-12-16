@@ -40,16 +40,16 @@ export function StatsPanel({
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" role="list">
       {stats.map((stat) => (
-        <Card key={stat.title}>
+        <Card key={stat.title} role="listitem">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-[#8B7B8E]">{stat.title}</p>
-                <p className="text-3xl mt-2 font-bold text-[#659EB3]">{stat.value}</p>
+                <p className="text-sm text-[#8B7B8E]" id={`stat-${stat.title.toLowerCase().replace(' ', '-')}`}>{stat.title}</p>
+                <p className="text-3xl mt-2 font-bold text-[#659EB3]" aria-labelledby={`stat-${stat.title.toLowerCase().replace(' ', '-')}`}>{stat.value}</p>
               </div>
-              <div className={`${stat.bgColor} p-3 rounded-lg`}>
+              <div className={`${stat.bgColor} p-3 rounded-lg`} aria-hidden="true">
                 <stat.icon className={`h-6 w-6 ${stat.color}`} />
               </div>
             </div>
