@@ -5,6 +5,7 @@ import path from 'path'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: '/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -14,11 +15,22 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'leaflet-vendor': ['leaflet', 'react-leaflet'],
-          'recharts-vendor': ['recharts'],
-          'ui-vendor': ['lucide-react', 'clsx', 'tailwind-merge'],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'react-vendor';
+            }
+            if (id.includes('leaflet')) {
+              return 'leaflet-vendor';
+            }
+            if (id.includes('recharts')) {
+              return 'recharts-vendor';
+            }
+            if (id.includes('lucide-react') || id.includes('clsx') || id.includes('tailwind-merge')) {
+              return 'ui-vendor';
+            }
+            return 'vendor';
+          }
         },
       },
     },
