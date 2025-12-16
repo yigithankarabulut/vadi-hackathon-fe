@@ -1,11 +1,12 @@
 import { Button, TextInput } from "flowbite-react";
-import { useState } from "react";
+import React, { useState } from "react";
+import { apiService } from "../../services";
 
 type RegisterProps = {
     isSignUp: boolean;
 };
 
-function Register({ isSignUp }: RegisterProps): JSX.Element {
+function Register({ isSignUp }: RegisterProps): React.JSX.Element {
     const [formData, setFormData] = useState({
         username: "",
         email: "",

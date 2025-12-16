@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import travellingIcon from '../../assets/travelling.png';
-import type { Aircraft, AircraftMapProps } from '../../types';
+import type { AircraftMapProps } from '../../types';
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -57,7 +57,7 @@ export function AircraftMap({ aircrafts, onAircraftClick }: AircraftMapProps) {
 
     const map = mapRef.current;
 
-    const createAircraftIcon = (status: string) => {
+    const createAircraftIcon = () => {
       return L.icon({
         iconUrl: travellingIcon,
         iconSize: [32, 32],
@@ -85,10 +85,10 @@ export function AircraftMap({ aircrafts, onAircraftClick }: AircraftMapProps) {
       
       if (marker) {
         marker.setLatLng(aircraft.position);
-        marker.setIcon(createAircraftIcon(aircraft.status));
+        marker.setIcon(createAircraftIcon());
       } else {
         marker = L.marker(aircraft.position, {
-          icon: createAircraftIcon(aircraft.status),
+          icon: createAircraftIcon(),
         });
 
         const popupContent = `

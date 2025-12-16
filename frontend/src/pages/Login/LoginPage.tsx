@@ -1,9 +1,10 @@
 import { Button, TextInput } from "flowbite-react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Register from "../Register/RegisterPage";
+import { apiService } from "../../services";
 
-function Login(): JSX.Element {
+function Login(): React.JSX.Element {
     const [isSignUp, setIsSignUp] = useState(false);
     const [loginData, setLoginData] = useState({ email: "", password: "" });
     const [isLoading, setIsLoading] = useState(false);

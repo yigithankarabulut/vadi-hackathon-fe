@@ -112,7 +112,7 @@ const generateMockAlerts = (): AlertItem[] => [
 export default function HomePage() {
   const [aircrafts, setAircrafts] = useState<Aircraft[]>(generateMockAircrafts());
   const [selectedAircraft, setSelectedAircraft] = useState<Aircraft | undefined>();
-  const [alerts, setAlerts] = useState<AlertItem[]>(generateMockAlerts());
+  const [alerts] = useState<AlertItem[]>(generateMockAlerts());
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -161,9 +161,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
-        {/* Stats Panel */}
         <div className="mb-6">
           <StatsPanel
             totalAircraft={stats.total}
@@ -173,9 +171,7 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Main Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Aircraft List - Left Sidebar */}
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
@@ -191,9 +187,7 @@ export default function HomePage() {
             </Card>
           </div>
 
-          {/* Map and Alerts - Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Map */}
             <Card>
               <CardHeader>
                 <CardTitle>Canlı Harita</CardTitle>
@@ -208,12 +202,10 @@ export default function HomePage() {
               </CardContent>
             </Card>
 
-            {/* Alerts */}
             <AlertPanel alerts={alerts} />
           </div>
         </div>
 
-        {/* Selected Aircraft Details */}
         {selectedAircraft && (
           <div className="mt-6">
             <Card>

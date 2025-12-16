@@ -1,7 +1,7 @@
 import { Card, CardContent } from '../../ui/card';
 import { Badge } from '../../ui/badge';
 import { Plane, Radio, AlertCircle } from 'lucide-react';
-import type { Aircraft, AircraftListProps } from '../../types';
+import type { AircraftListProps } from '../../types';
 
 export function AircraftList({ aircrafts, selectedAircraft, onSelect }: AircraftListProps) {
   const getStatusBadge = (status: string) => {
