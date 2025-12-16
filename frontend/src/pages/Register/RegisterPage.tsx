@@ -75,19 +75,19 @@ function Register({ isSignUp }: RegisterProps): React.JSX.Element {
     };
 
     return (
-        <section className={`absolute top-0 left-0 h-full w-1/2 flex flex-col justify-center p-12 bg-[#E0D4C0] transition-all duration-500 ease-in-out ${isSignUp ? "translate-x-full opacity-100 z-10" : "opacity-0 z-0"}`} aria-label="Sign up form" aria-hidden={!isSignUp}>
+        <section className={`absolute top-0 left-0 h-full w-1/2 flex flex-col justify-center p-12 bg-[#FFFCEF] transition-all duration-500 ease-in-out ${isSignUp ? "translate-x-full opacity-100 z-10" : "opacity-0 z-0"}`} aria-label="Sign up form" aria-hidden={!isSignUp}>
             <form className="flex flex-col gap-4 h-full justify-center text-center" onSubmit={handleSubmit} noValidate>
-                <h1 className="text-3xl font-bold mb-4 text-[#4E0000]">Create Account</h1>
-                <p className="text-sm text-[#13273F] mb-6">use your email for registration</p>
+                <h1 className="text-3xl font-bold mb-4 text-[#659EB3]">Create Account</h1>
+                <p className="text-sm text-[#8B7B8E] mb-6">use your email for registration</p>
                 
                 <div>
-                    <label htmlFor="signup-name" className="block text-sm font-medium text-[#13273F] mb-2">Username <span className="text-red-600" aria-label="required">*</span></label>
+                    <label htmlFor="signup-name" className="block text-sm font-medium text-[#8B7B8E] mb-2">Username <span className="text-red-600" aria-label="required">*</span></label>
                     <TextInput 
                         id="signup-name" 
                         type="text" 
                         placeholder="Enter your username" 
                         required 
-                        className="bg-[#13273F] text-[#E0D4C0] placeholder:text-[#E0D4C0]/60"
+                        className="bg-[#659EB3]/10 text-[#4E5C6B] placeholder:text-[#8B7B8E]/60 border-[#659EB3]/30"
                         value={formData.username}
                         onChange={handleInputChange}
                         aria-label="Username"
@@ -102,13 +102,13 @@ function Register({ isSignUp }: RegisterProps): React.JSX.Element {
                 </div>
 
                 <div>
-                    <label htmlFor="signup-email" className="block text-sm font-medium text-[#13273F] mb-2">Email Address <span className="text-red-600" aria-label="required">*</span></label>
+                    <label htmlFor="signup-email" className="block text-sm font-medium text-[#8B7B8E] mb-2">Email Address <span className="text-red-600" aria-label="required">*</span></label>
                     <TextInput 
                         id="signup-email" 
                         type="email" 
                         placeholder="Enter your email" 
                         required 
-                        className="bg-[#13273F] text-[#E0D4C0] placeholder:text-[#E0D4C0]/60"
+                        className="bg-[#659EB3]/10 text-[#4E5C6B] placeholder:text-[#8B7B8E]/60 border-[#659EB3]/30"
                         value={formData.email}
                         onChange={handleInputChange}
                         aria-label="Email address"
@@ -123,13 +123,13 @@ function Register({ isSignUp }: RegisterProps): React.JSX.Element {
                 </div>
 
                 <div>
-                    <label htmlFor="signup-password" className="block text-sm font-medium text-[#13273F] mb-2">Password <span className="text-red-600" aria-label="required">*</span></label>
+                    <label htmlFor="signup-password" className="block text-sm font-medium text-[#8B7B8E] mb-2">Password <span className="text-red-600" aria-label="required">*</span></label>
                     <TextInput 
                         id="signup-password" 
                         type="password" 
                         placeholder="Enter your password" 
                         required 
-                        className="bg-[#13273F] text-[#E0D4C0] placeholder:text-[#E0D4C0]/60"
+                        className="bg-[#659EB3]/10 text-[#4E5C6B] placeholder:text-[#8B7B8E]/60 border-[#659EB3]/30"
                         value={formData.password}
                         onChange={handleInputChange}
                         aria-label="Password"
@@ -145,7 +145,7 @@ function Register({ isSignUp }: RegisterProps): React.JSX.Element {
 
                 <Button 
                     type="submit" 
-                    className="bg-[#13273F] hover:bg-[#0f1f33] mt-4 border-0 transition-transform active:scale-95 text-[#E0D4C0] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4E0000]"
+                    className="bg-[#659EB3] hover:bg-[#5A8BA0] mt-4 border-0 transition-transform active:scale-95 text-[#FFFCEF] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#8B7B8E]"
                     disabled={isLoading}
                     aria-busy={isLoading}
                 >
