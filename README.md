@@ -1,1 +1,1 @@
-# vadi-hackathon-be
+# Vadi Hackathon Monorepo
