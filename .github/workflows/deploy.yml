@@ -1,4 +1,4 @@
-name: Frontend CI/CD (K3s with Templates)
+name: Frontend CI/CD (K3s Direct Apply)
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
   # JOB 1: BUILD & PUSH
   # ---------------------------------------------------
   build_and_push:
-    name: 🐳 Build & Push Docker Image
+    name: Build & Push Docker Image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -47,7 +47,7 @@ jobs:
   # JOB 2: DEPLOY
   # ---------------------------------------------------
   deploy:
-    name: 🚀 Deploy to ${{ github.ref_name == 'main' && 'Production' || 'Test' }}
+    name: Deploy to ${{ github.ref_name == 'main' && 'Production' || 'Test' }}
     needs: build_and_push
     runs-on: ubuntu-latest
     
@@ -56,52 +56,91 @@ jobs:
       url: ${{ github.ref_name == 'main' && 'https://yigithankarabulut.com' || 'https://test.yigithankarabulut.com' }}
 
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Config Env
-        run: |
-          if [ "${{ github.ref_name }}" == "main" ]; then
-            echo "NAMESPACE=prod" >> $GITHUB_ENV
-            echo "REPLICAS=2" >> $GITHUB_ENV
-            echo "APP_DOMAIN=yigithankarabulut.com" >> $GITHUB_ENV
-          else
-            echo "NAMESPACE=test" >> $GITHUB_ENV
-            echo "REPLICAS=1" >> $GITHUB_ENV
-            echo "APP_DOMAIN=test.yigithankarabulut.com" >> $GITHUB_ENV
-          fi
-          echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
-          echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> $GITHUB_ENV
-
-      - name: Render Manifests
-        run: |
-          mkdir -p k8s_rendered
-          envsubst < deployment/deployment.yml > k8s_rendered/deployment.yaml
-          envsubst < deployment/service.yml > k8s_rendered/service.yaml
-          envsubst < deployment/ingress.yml > k8s_rendered/ingress.yaml
-
-      - name: Copy Files to Server
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          source: "k8s_rendered/*"
-          target: "/tmp/frontend-deploy-${{ github.sha }}"
-
-      - name: Apply on Server
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /tmp/frontend-deploy-${{ github.sha }}/k8s_rendered
+            # Define variables for the template
+            IMAGE_TAG="${{ github.sha }}"
+            DOCKER_USERNAME="${{ secrets.DOCKER_USERNAME }}"
             
-            kubectl get namespace ${{ env.NAMESPACE }} > /dev/null 2>&1 || kubectl create namespace ${{ env.NAMESPACE }}
+            if [ "${{ github.ref_name }}" == "main" ]; then
+              NAMESPACE="prod"
+              REPLICAS="2"
+              APP_DOMAIN="yigithankarabulut.com"
+            else
+              NAMESPACE="test"
+              REPLICAS="1"
+              APP_DOMAIN="test.yigithankarabulut.com"
+            fi
             
-            kubectl apply -f .
+            echo "Deploying to $NAMESPACE namespace..."
             
-            kubectl rollout restart deployment/frontend-app -n ${{ env.NAMESPACE }}
+            # Ensure Namespace exists
+            kubectl get namespace $NAMESPACE > /dev/null 2>&1 || kubectl create namespace $NAMESPACE
             
-            cd ~
-            rm -rf /tmp/frontend-deploy-${{ github.sha }}
+            # Generate and Apply Manifests directly on the server
+            cat <<EOF | kubectl apply -f -
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: frontend-app
+              namespace: $NAMESPACE
+              labels:
+                app: frontend-app
+            spec:
+              replicas: $REPLICAS
+              selector:
+                matchLabels:
+                  app: frontend-app
+              template:
+                metadata:
+                  labels:
+                    app: frontend-app
+                spec:
+                  containers:
+                  - name: frontend
+                    image: $DOCKER_USERNAME/frontend-repo:$IMAGE_TAG
+                    ports:
+                    - containerPort: 80
+                    imagePullPolicy: Always
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: frontend-service
+              namespace: $NAMESPACE
+            spec:
+              selector:
+                app: frontend-app
+              ports:
+                - protocol: TCP
+                  port: 80
+                  targetPort: 80
+            ---
+            apiVersion: networking.k8s.io/v1
+            kind: Ingress
+            metadata:
+              name: frontend-ingress
+              namespace: $NAMESPACE
+            spec:
+              rules:
+              - host: $APP_DOMAIN
+                http:
+                  paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: frontend-service
+                        port:
+                          number: 80
+            EOF
+            
+            # Force Restart to pull new image
+            kubectl rollout restart deployment/frontend-app -n $NAMESPACE
+            
+            echo "Deployment to $NAMESPACE complete."
