@@ -42,51 +42,52 @@ jobs:
             VITE_API_URL=${{ steps.vars.outputs.API_URL }}
 
   deploy_test:
-    name: Deploy to TEST
+    name: Deploy to TEST with RETRY
     needs: build_and_push
     if: github.ref == 'refs/heads/test'
     runs-on: ubuntu-latest
     steps:
-      - name: Cool down connection
-        run: sleep 10
+      - name: Deploy via SSH (Robust Retry Mode)
+        run: |
+          # 1. SSH Anahtarını Hazırla
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          # 2. Değişkenleri Tanımla
+          HOST="${{ secrets.SSH_HOST }}"
+          USER="${{ secrets.SSH_USER }}"
+          NAMESPACE="test"
+          DOMAIN="test.yigithankarabulut.com"
+          IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          DEPLOY_NAME="${{ env.DEPLOYMENT_NAME }}"
 
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          port: 22
-          timeout: 30s
-          command_timeout: 20m
-          use_insecure_cipher: true
-          script_stop: true
-          script: |
-            NAMESPACE="test"
-            DOMAIN="test.yigithankarabulut.com"
-            IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          # 3. Sunucuda Çalışacak Komutlar (EOF Bloğu)
+          # Bu blok sunucuya tek seferde gönderilecek
+          REMOTE_COMMANDS=$(cat <<EOF
+            export PATH=\$PATH:/usr/local/bin:/usr/bin
             
-            # Namespace kontrolü
+            # Namespace Kontrolü
             kubectl get namespace $NAMESPACE > /dev/null 2>&1 || kubectl create namespace $NAMESPACE
             
-            # Deployment
-            cat <<EOF | kubectl apply -f -
+            # Deployment Dosyasını Uygula
+            cat <<YAML | kubectl apply -f -
             apiVersion: apps/v1
             kind: Deployment
             metadata:
-              name: ${{ env.DEPLOYMENT_NAME }}
+              name: $DEPLOY_NAME
               namespace: $NAMESPACE
               labels:
-                app: ${{ env.DEPLOYMENT_NAME }}
+                app: $DEPLOY_NAME
             spec:
               replicas: 1
               selector:
                 matchLabels:
-                  app: ${{ env.DEPLOYMENT_NAME }}
+                  app: $DEPLOY_NAME
               template:
                 metadata:
                   labels:
-                    app: ${{ env.DEPLOYMENT_NAME }}
+                    app: $DEPLOY_NAME
                 spec:
                   containers:
                   - name: frontend
@@ -97,11 +98,11 @@ jobs:
             apiVersion: v1
             kind: Service
             metadata:
-              name: ${{ env.DEPLOYMENT_NAME }}-service
+              name: $DEPLOY_NAME-service
               namespace: $NAMESPACE
             spec:
               selector:
-                app: ${{ env.DEPLOYMENT_NAME }}
+                app: $DEPLOY_NAME
               ports:
                 - protocol: TCP
                   port: 80
@@ -110,7 +111,7 @@ jobs:
             apiVersion: networking.k8s.io/v1
             kind: Ingress
             metadata:
-              name: ${{ env.DEPLOYMENT_NAME }}-ingress
+              name: $DEPLOY_NAME-ingress
               namespace: $NAMESPACE
             spec:
               rules:
@@ -121,58 +122,85 @@ jobs:
                     pathType: Prefix
                     backend:
                       service:
-                        name: ${{ env.DEPLOYMENT_NAME }}-service
+                        name: $DEPLOY_NAME-service
                         port:
                           number: 80
-            EOF
+            YAML
             
-            # Rollout restart
-            kubectl rollout restart deployment/${{ env.DEPLOYMENT_NAME }} -n $NAMESPACE
+            # Restart
+            kubectl rollout restart deployment/$DEPLOY_NAME -n $NAMESPACE
+          EOF
+          )
+
+          # 4. BAĞLANTI DÖNGÜSÜ (Retry Logic)
+          # Connection Reset yersek 5 kere tekrar dener
+          MAX_RETRIES=5
+          COUNT=0
+          SUCCESS=0
+          
+          while [ \$COUNT -lt \$MAX_RETRIES ]; do
+            echo "Attempt \$((COUNT+1)) of \$MAX_RETRIES to connect to \$HOST..."
+            
+            # ssh komutu (StrictHostKeyChecking=no ile onayı atlar)
+            ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -i ~/.ssh/id_rsa \$USER@\$HOST "\$REMOTE_COMMANDS"
+            
+            if [ \$? -eq 0 ]; then
+              echo "✅ Deployment SUCCESS!"
+              SUCCESS=1
+              break
+            else
+              echo "⚠️ Connection failed or reset. Retrying in 10 seconds..."
+              sleep 10
+              COUNT=\$((COUNT+1))
+            fi
+          done
+
+          if [ \$SUCCESS -eq 0 ]; then
+            echo "❌ Failed to deploy after \$MAX_RETRIES attempts."
+            exit 1
+          fi
 
   deploy_prod:
-    name: Deploy to PRODUCTION
+    name: Deploy to PROD with RETRY
     needs: build_and_push
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Cool down connection
-        run: sleep 10
+      - name: Deploy via SSH (Robust Retry Mode)
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          HOST="${{ secrets.SSH_HOST }}"
+          USER="${{ secrets.SSH_USER }}"
+          NAMESPACE="prod"
+          DOMAIN="yigithankarabulut.com"
+          IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          DEPLOY_NAME="${{ env.DEPLOYMENT_NAME }}"
 
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          port: 22
-          timeout: 30s
-          command_timeout: 20m
-          use_insecure_cipher: true
-          script_stop: true
-          script: |
-            NAMESPACE="prod"
-            DOMAIN="yigithankarabulut.com"
-            IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          REMOTE_COMMANDS=$(cat <<EOF
+            export PATH=\$PATH:/usr/local/bin:/usr/bin
             
             kubectl get namespace $NAMESPACE > /dev/null 2>&1 || kubectl create namespace $NAMESPACE
             
-            cat <<EOF | kubectl apply -f -
+            cat <<YAML | kubectl apply -f -
             apiVersion: apps/v1
             kind: Deployment
             metadata:
-              name: ${{ env.DEPLOYMENT_NAME }}
+              name: $DEPLOY_NAME
               namespace: $NAMESPACE
               labels:
-                app: ${{ env.DEPLOYMENT_NAME }}
+                app: $DEPLOY_NAME
             spec:
               replicas: 2
               selector:
                 matchLabels:
-                  app: ${{ env.DEPLOYMENT_NAME }}
+                  app: $DEPLOY_NAME
               template:
                 metadata:
                   labels:
-                    app: ${{ env.DEPLOYMENT_NAME }}
+                    app: $DEPLOY_NAME
                 spec:
                   containers:
                   - name: frontend
@@ -183,11 +211,11 @@ jobs:
             apiVersion: v1
             kind: Service
             metadata:
-              name: ${{ env.DEPLOYMENT_NAME }}-service
+              name: $DEPLOY_NAME-service
               namespace: $NAMESPACE
             spec:
               selector:
-                app: ${{ env.DEPLOYMENT_NAME }}
+                app: $DEPLOY_NAME
               ports:
                 - protocol: TCP
                   port: 80
@@ -196,7 +224,7 @@ jobs:
             apiVersion: networking.k8s.io/v1
             kind: Ingress
             metadata:
-              name: ${{ env.DEPLOYMENT_NAME }}-ingress
+              name: $DEPLOY_NAME-ingress
               namespace: $NAMESPACE
             spec:
               rules:
@@ -207,9 +235,34 @@ jobs:
                     pathType: Prefix
                     backend:
                       service:
-                        name: ${{ env.DEPLOYMENT_NAME }}-service
+                        name: $DEPLOY_NAME-service
                         port:
                           number: 80
-            EOF
+            YAML
             
-            kubectl rollout restart deployment/${{ env.DEPLOYMENT_NAME }} -n $NAMESPACE
+            kubectl rollout restart deployment/$DEPLOY_NAME -n $NAMESPACE
+          EOF
+          )
+
+          MAX_RETRIES=5
+          COUNT=0
+          SUCCESS=0
+          
+          while [ \$COUNT -lt \$MAX_RETRIES ]; do
+            echo "Attempt \$((COUNT+1)) of \$MAX_RETRIES to connect to \$HOST..."
+            ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -i ~/.ssh/id_rsa \$USER@\$HOST "\$REMOTE_COMMANDS"
+            if [ \$? -eq 0 ]; then
+              echo "✅ Deployment SUCCESS!"
+              SUCCESS=1
+              break
+            else
+              echo "⚠️ Connection failed. Retrying in 10 seconds..."
+              sleep 10
+              COUNT=\$((COUNT+1))
+            fi
+          done
+
+          if [ \$SUCCESS -eq 0 ]; then
+            echo "❌ Failed after \$MAX_RETRIES attempts."
+            exit 1
+          fi
