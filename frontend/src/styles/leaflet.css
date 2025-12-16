@@ -1,0 +1,16 @@
+/* Leaflet CSS */
+@import 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+}
+
+.aircraft-marker {
+  background: transparent;
+  border: none;
+}
+
+.aircraft-marker svg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
