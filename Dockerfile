@@ -1,10 +1,10 @@
 # --- Stage 1: Build ---
-FROM node:18-alpine as builder
+from node:24-alpine as builder
 WORKDIR /app
 
 COPY frontend/package*.json ./
 
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 COPY frontend/ .
 
@@ -12,7 +12,7 @@ ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
 RUN npm run build
 
-FROM nginx:alpine
+from nginx:alpine
 
 COPY --from=builder /app/dist /usr/share/nginx/html
 
