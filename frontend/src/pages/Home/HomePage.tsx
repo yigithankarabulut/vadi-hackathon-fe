@@ -3,9 +3,18 @@ import { AircraftMap } from './AircraftMap';
 import { AircraftList } from './AircraftList';
 import { AlertPanel } from './AlertPanel';
 import { StatsPanel } from './StatsPanel';
+import { AircraftDetails } from '../../components/AircraftDetails';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Plane } from 'lucide-react';
 import type { Aircraft, AlertItem } from '../../types';
+
+const generateInitialTimeSeriesData = (baseValue: number, count: number = 60) => {
+  const now = Date.now();
+  return Array.from({ length: count }, (_, i) => ({
+    timestamp: now - (count - i) * 1000,
+    value: baseValue + (Math.random() - 0.5) * baseValue * 0.1,
+  }));
+};
 
 const generateMockAircrafts = (): Aircraft[] => [
   {
@@ -20,6 +29,10 @@ const generateMockAircrafts = (): Aircraft[] => [
       [40.2, 33.5],
       [40.5, 34.2],
     ],
+    motorTemp: 78,
+    externalTemp: 28,
+    speedHistory: generateInitialTimeSeriesData(450),
+    altitudeHistory: generateInitialTimeSeriesData(35000),
   },
   {
     id: 'AC-002',
@@ -33,6 +46,10 @@ const generateMockAircrafts = (): Aircraft[] => [
       [40.5, 30.0],
       [40.0, 31.0],
     ],
+    motorTemp: 72,
+    externalTemp: 26,
+    speedHistory: generateInitialTimeSeriesData(420),
+    altitudeHistory: generateInitialTimeSeriesData(28000),
   },
   {
     id: 'AC-003',
@@ -45,6 +62,10 @@ const generateMockAircrafts = (): Aircraft[] => [
       [38.4237, 27.1428],
       [38.8, 28.0],
     ],
+    motorTemp: 95,
+    externalTemp: 32,
+    speedHistory: generateInitialTimeSeriesData(380),
+    altitudeHistory: generateInitialTimeSeriesData(15000),
   },
   {
     id: 'AC-004',
@@ -58,6 +79,10 @@ const generateMockAircrafts = (): Aircraft[] => [
       [37.5, 31.5],
       [38.0, 32.0],
     ],
+    motorTemp: 80,
+    externalTemp: 29,
+    speedHistory: generateInitialTimeSeriesData(445),
+    altitudeHistory: generateInitialTimeSeriesData(32000),
   },
   {
     id: 'AC-005',
@@ -66,6 +91,10 @@ const generateMockAircrafts = (): Aircraft[] => [
     altitude: 0,
     speed: 0,
     status: 'inactive',
+    motorTemp: 45,
+    externalTemp: 22,
+    speedHistory: generateInitialTimeSeriesData(0),
+    altitudeHistory: generateInitialTimeSeriesData(0),
   },
   {
     id: 'AC-006',
@@ -79,6 +108,10 @@ const generateMockAircrafts = (): Aircraft[] => [
       [41.2, 30.5],
       [41.5, 31.8],
     ],
+    motorTemp: 76,
+    externalTemp: 27,
+    speedHistory: generateInitialTimeSeriesData(465),
+    altitudeHistory: generateInitialTimeSeriesData(38000),
   },
 ];
 
@@ -122,20 +155,43 @@ export default function HomePage() {
             const [lat, lng] = aircraft.position;
             const newLat = lat + (Math.random() - 0.5) * 0.01;
             const newLng = lng + (Math.random() - 0.5) * 0.01;
+            const newAltitude = aircraft.altitude + (Math.random() - 0.5) * 100;
+            const newSpeed = aircraft.speed + (Math.random() - 0.5) * 5;
+            const newMotorTemp = (aircraft.motorTemp || 75) + (Math.random() - 0.5) * 2;
+            const newExternalTemp = (aircraft.externalTemp || 25) + (Math.random() - 0.5) * 1;
+            
+            const newRoute = aircraft.route ? [...aircraft.route, [newLat, newLng] as [number, number]] : [[newLat, newLng] as [number, number]];
+            const limitedRoute = newRoute.slice(-20);
+
+            const now = Date.now();
+            const speedHistory = [...(aircraft.speedHistory || []), { timestamp: now, value: newSpeed }].slice(-60);
+            const altitudeHistory = [...(aircraft.altitudeHistory || []), { timestamp: now, value: newAltitude }].slice(-60);
+
             return {
               ...aircraft,
               position: [newLat, newLng] as [number, number],
-              altitude: aircraft.altitude + (Math.random() - 0.5) * 100,
-              speed: aircraft.speed + (Math.random() - 0.5) * 5,
+              altitude: newAltitude,
+              speed: newSpeed,
+              motorTemp: newMotorTemp,
+              externalTemp: newExternalTemp,
+              route: limitedRoute,
+              speedHistory,
+              altitudeHistory,
             };
           }
           return aircraft;
         })
       );
-    }, 5000);
+      
+      setSelectedAircraft((prev) => {
+        if (!prev) return prev;
+        const updated = aircrafts.find((a) => a.id === prev.id);
+        return updated || prev;
+      });
+    }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [aircrafts]);
 
   const stats = {
     total: aircrafts.length,
@@ -170,8 +226,8 @@ export default function HomePage() {
           />
         </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <section className="lg:col-span-1" aria-labelledby="aircraft-list-title">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+          <section className="xl:col-span-3" aria-labelledby="aircraft-list-title">
             <Card>
               <CardHeader>
                 <CardTitle id="aircraft-list-title" className="text-[#659EB3]">Uçak Listesi</CardTitle>
@@ -186,7 +242,7 @@ export default function HomePage() {
             </Card>
           </section>
 
-          <div className="lg:col-span-2 space-y-6">
+          <div className="xl:col-span-5 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
             <section aria-labelledby="map-title">
               <Card>
                 <CardHeader>
@@ -205,45 +261,26 @@ export default function HomePage() {
 
             <AlertPanel alerts={alerts} />
           </div>
-        </div>
 
-        {selectedAircraft && (
-          <section className="mt-6" aria-labelledby="selected-aircraft-title" role="region" aria-live="polite">
-            <Card>
-              <CardHeader>
-                <CardTitle id="selected-aircraft-title" className="text-[#659EB3]">Seçili Uçak Detayları - {selectedAircraft.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <dl className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div>
-                    <dt className="text-sm text-[#8B7B8E]">Araç No</dt>
-                    <dd className="text-lg font-bold text-[#659EB3]">{selectedAircraft.id}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm text-[#8B7B8E]">Yükseklik</dt>
-                    <dd className="text-lg font-bold text-[#659EB3]">
-                      <span aria-label={`${selectedAircraft.altitude} feet`}>{selectedAircraft.altitude} ft</span>
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm text-[#8B7B8E]">Hız</dt>
-                    <dd className="text-lg font-bold text-[#659EB3]">
-                      <span aria-label={`${selectedAircraft.speed} knot`}>{selectedAircraft.speed} kt</span>
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm text-[#8B7B8E]">Konum</dt>
-                    <dd className="text-sm font-medium text-[#659EB3]">
-                      <span aria-label={`Enlem ${selectedAircraft.position[0].toFixed(4)}, Boylam ${selectedAircraft.position[1].toFixed(4)}`}>
-                        {selectedAircraft.position[0].toFixed(4)}, {selectedAircraft.position[1].toFixed(4)}
-                      </span>
-                    </dd>
-                  </div>
-                </dl>
-              </CardContent>
-            </Card>
-          </section>
-        )}
+          <div className="xl:col-span-4 max-h-[calc(100vh-200px)]">
+            {selectedAircraft ? (
+              <section aria-labelledby="selected-aircraft-title" role="region" aria-live="polite" className="h-full">
+                <AircraftDetails
+                  aircraft={selectedAircraft}
+                  onClose={() => setSelectedAircraft(undefined)}
+                />
+              </section>
+            ) : (
+              <Card className="h-full flex items-center justify-center bg-white">
+                <CardContent className="text-center text-gray-500 py-12">
+                  <Plane className="w-16 h-16 mx-auto mb-4 text-[#659EB3] opacity-50" />
+                  <p className="text-lg font-semibold">Uçak Seçilmedi</p>
+                  <p className="text-sm mt-2">Detaylı bilgi görmek için haritadan veya listeden bir uçak seçin</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
       </main>
     </div>
   );
