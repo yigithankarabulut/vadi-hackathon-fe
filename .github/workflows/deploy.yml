@@ -9,9 +9,6 @@ env:
   DEPLOYMENT_NAME: frontend-app
 
 jobs:
-  # ---------------------------------------------------
-  # JOB 1: BUILD & PUSH
-  # ---------------------------------------------------
   build_and_push:
     name: 🐳 Build & Push Docker Image
     runs-on: ubuntu-latest
@@ -44,18 +41,11 @@ jobs:
           build-args: |
             VITE_API_URL=${{ steps.vars.outputs.API_URL }}
 
-  # ---------------------------------------------------
-  # JOB 2: DEPLOY TO TEST
-  # ---------------------------------------------------
   deploy_test:
     name: 🧪 Deploy to TEST
     needs: build_and_push
     if: github.ref == 'refs/heads/test'
     runs-on: ubuntu-latest
-    environment: 
-      name: test
-      url: https://test.yigithankarabulut.com
-    
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@master
@@ -64,8 +54,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            echo "🚀 Deploying to TEST environment..."
-            
+            # Değişkenler
             NAMESPACE="test"
             DOMAIN="test.yigithankarabulut.com"
             IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
@@ -129,20 +118,12 @@ jobs:
             EOF
             
             kubectl rollout restart deployment/${{ env.DEPLOYMENT_NAME }} -n $NAMESPACE
-            echo "✅ Deployment to TEST complete."
 
-  # ---------------------------------------------------
-  # JOB 3: DEPLOY TO PROD
-  # ---------------------------------------------------
   deploy_prod:
     name: 🚀 Deploy to PRODUCTION
     needs: build_and_push
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    environment: 
-      name: production
-      url: https://yigithankarabulut.com
-
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@master
@@ -151,8 +132,6 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            echo "🚨 Deploying to PRODUCTION environment..."
-            
             NAMESPACE="prod"
             DOMAIN="yigithankarabulut.com"
             IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
@@ -216,4 +195,3 @@ jobs:
             EOF
             
             kubectl rollout restart deployment/${{ env.DEPLOYMENT_NAME }} -n $NAMESPACE
-            echo "✅ Deployment to PROD complete."
