@@ -75,7 +75,7 @@ function Register({ isSignUp }: RegisterProps): React.JSX.Element {
     };
 
     return (
-        <section className={`absolute top-0 left-0 h-full w-1/2 flex flex-col justify-center p-12 bg-[#FFFCEF] transition-all duration-500 ease-in-out ${isSignUp ? "translate-x-full opacity-100 z-10" : "opacity-0 z-0"}`} aria-label="Sign up form" aria-hidden={!isSignUp}>
+        <section className={`absolute top-0 left-0 h-full w-1/2 flex flex-col justify-center p-12 bg-white transition-all duration-500 ease-in-out ${isSignUp ? "translate-x-full opacity-100 z-10" : "opacity-0 z-0"}`} aria-label="Sign up form" aria-hidden={!isSignUp}>
             <form className="flex flex-col gap-4 h-full justify-center text-center" onSubmit={handleSubmit} noValidate>
                 <h1 className="text-3xl font-bold mb-4 text-[#659EB3]">Create Account</h1>
                 <p className="text-sm text-[#8B7B8E] mb-6">use your email for registration</p>
