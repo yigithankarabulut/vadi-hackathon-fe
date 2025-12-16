@@ -1,0 +1,136 @@
+name: Frontend CI/CD (K3s with Templates)
+
+on:
+  push:
+    branches: [ "main", "test" ]
+
+env:
+  IMAGE_NAME: frontend-repo
+
+jobs:
+  # ---------------------------------------------------
+  # JOB 1: BUILD & PUSH
+  # ---------------------------------------------------
+  build_and_push:
+    name: 🐳 Build & Push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set API URL
+        id: vars
+        run: |
+          if [ "${{ github.ref_name }}" == "main" ]; then
+             echo "API_URL=${{ secrets.PROD_API_URL }}" >> $GITHUB_OUTPUT
+          else
+             echo "API_URL=${{ secrets.TEST_API_URL }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+          build-args: |
+            VITE_API_URL=${{ steps.vars.outputs.API_URL }}
+
+  # ---------------------------------------------------
+  # JOB 2: DEPLOY
+  # ---------------------------------------------------
+  deploy:
+    name: 🚀 Deploy to K3s
+    needs: build_and_push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set Environment Variables
+        run: |
+          if [ "${{ github.ref_name }}" == "main" ]; then
+            echo "NAMESPACE=prod" >> $GITHUB_ENV
+            echo "REPLICAS=2" >> $GITHUB_ENV
+            echo "APP_DOMAIN=yigithankarabulut.com" >> $GITHUB_ENV
+            echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
+          else
+            echo "NAMESPACE=test" >> $GITHUB_ENV
+            echo "REPLICAS=1" >> $GITHUB_ENV
+            echo "APP_DOMAIN=test.yigithankarabulut.com" >> $GITHUB_ENV
+            echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
+          fi
+          # Docker Username'i de ENV'e alalım ki envsubst görsün
+          echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> $GITHUB_ENV
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          envs: DOCKER_USERNAME,NAMESPACE,REPLICAS,APP_DOMAIN,IMAGE_TAG
+          script: |
+            kubectl get namespace $NAMESPACE > /dev/null 2>&1 || kubectl create namespace $NAMESPACE            
+            
+  deploy_apply:
+    name: 🚀 Apply Manifests
+    needs: build_and_push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Config Env
+        run: |
+          if [ "${{ github.ref_name }}" == "main" ]; then
+            echo "NAMESPACE=prod" >> $GITHUB_ENV
+            echo "REPLICAS=2" >> $GITHUB_ENV
+            echo "APP_DOMAIN=yigithankarabulut.com" >> $GITHUB_ENV
+          else
+            echo "NAMESPACE=test" >> $GITHUB_ENV
+            echo "REPLICAS=1" >> $GITHUB_ENV
+            echo "APP_DOMAIN=test.yigithankarabulut.com" >> $GITHUB_ENV
+          fi
+          echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
+          echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> $GITHUB_ENV
+
+      - name: Render Manifests
+        run: |
+          mkdir -p k8s_rendered
+          # envsubst ile $VAR olan yerleri gerçek değerle değiştirip yeni klasöre kaydet
+          envsubst < deployment/deployment.yml > k8s_rendered/deployment.yaml
+          envsubst < deployment/service.yml > k8s_rendered/service.yaml
+          envsubst < deployment/ingress.yml > k8s_rendered/ingress.yaml
+
+      - name: Copy Files to Server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "k8s_rendered/*"
+          target: "/tmp/frontend-deploy-${{ github.sha }}"
+
+      - name: Apply on Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /tmp/frontend-deploy-${{ github.sha }}/k8s_rendered
+            
+            kubectl get namespace ${{ env.NAMESPACE }} > /dev/null 2>&1 || kubectl create namespace ${{ env.NAMESPACE }}
+            
+            kubectl apply -f .
+            
+            kubectl rollout restart deployment/frontend-app -n ${{ env.NAMESPACE }}
+            
+            cd ~
+            rm -rf /tmp/frontend-deploy-${{ github.sha }}
