@@ -1,4 +1,3 @@
-import React from 'react';
 import type { Aircraft } from '../types';
 import { SpeedGauge } from './SpeedGauge';
 import { AltitudeBar } from './AltitudeBar';
