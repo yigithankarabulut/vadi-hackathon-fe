@@ -122,28 +122,52 @@ export function AircraftMap({ aircrafts, onAircraftClick }: AircraftMapProps) {
         markersRef.current.set(aircraft.id, marker);
       }
 
-      if (aircraft.route && aircraft.route.length > 0) {
+      if (aircraft.route && aircraft.route.length > 1) {
         let route = routesRef.current.get(aircraft.id);
-        const routeColor = aircraft.status === 'active' ? '#10b981' : '#ef4444';
+        
+        const routeColor = aircraft.status === 'active' ? '#659EB3' : 
+                          aircraft.status === 'warning' ? '#f59e0b' : '#ef4444';
 
         if (route) {
           route.setLatLngs(aircraft.route);
           route.setStyle({ color: routeColor });
         } else {
+          const trailBase = L.polyline(aircraft.route, {
+            color: routeColor,
+            weight: 6,
+            opacity: 0.2,
+            smoothFactor: 1,
+          });
+          trailBase.addTo(map);
+          
           route = L.polyline(aircraft.route, {
             color: routeColor,
-            weight: 2,
-            opacity: 0.6,
-            dashArray: '5, 10',
+            weight: 3,
+            opacity: 0.7,
+            smoothFactor: 1,
+            lineCap: 'round',
+            lineJoin: 'round',
           });
           route.addTo(map);
           routesRef.current.set(aircraft.id, route);
+          routesRef.current.set(`${aircraft.id}_base`, trailBase);
+        }
+        
+        const trailBase = routesRef.current.get(`${aircraft.id}_base`);
+        if (trailBase) {
+          trailBase.setLatLngs(aircraft.route);
+          trailBase.setStyle({ color: routeColor });
         }
       } else {
         const route = routesRef.current.get(aircraft.id);
+        const trailBase = routesRef.current.get(`${aircraft.id}_base`);
         if (route) {
           map.removeLayer(route);
           routesRef.current.delete(aircraft.id);
+        }
+        if (trailBase) {
+          map.removeLayer(trailBase);
+          routesRef.current.delete(`${aircraft.id}_base`);
         }
       }
     });
