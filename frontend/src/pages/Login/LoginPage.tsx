@@ -75,12 +75,12 @@ function Login(): React.JSX.Element {
     };
 
             return (
-        <main className="min-h-screen bg-[#c2ae93] flex items-center justify-center px-4" style={{position:"absolute", width:"100%", height:"100%", alignItems:"center", top:"0", left:"0"}}>
-            <section className={`relative bg-[#FFFCEF] rounded-2xl shadow-2xl overflow-hidden w-full max-w-4xl min-h-[600px] transition-all duration-500`} role="main">
+        <main className="min-h-screen bg-[#FFFCEF] flex items-center justify-center px-4" style={{position:"absolute", width:"100%", height:"100%", alignItems:"center", top:"0", left:"0"}}>
+            <section className={`relative bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-4xl min-h-[600px] transition-all duration-500`} role="main">
                 
                 <Register isSignUp={isSignUp} ></Register>
                 
-                <section className={`absolute top-0 left-0 h-full w-1/2 flex flex-col justify-center p-12 bg-[#FFFCEF] transition-all duration-500 ease-in-out z-2 ${isSignUp ? "translate-x-full opacity-0" : "opacity-100"}`} aria-hidden={isSignUp}>
+                <section className={`absolute top-0 left-0 h-full w-1/2 flex flex-col justify-center p-12 bg-white transition-all duration-500 ease-in-out z-2 ${isSignUp ? "translate-x-full opacity-0" : "opacity-100"}`} aria-hidden={isSignUp}>
                     <form className="flex flex-col gap-4 h-full justify-center text-center" onSubmit={handleLogin} noValidate>
                         <h1 className="text-3xl font-bold mb-4 text-[#659EB3]">Sign In</h1>
                         <p className="text-sm text-[#8B7B8E] mb-6">use your email password</p>
@@ -140,14 +140,14 @@ function Login(): React.JSX.Element {
                 </section>
 
                 <section className={`absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-transform duration-500 ease-in-out z-20 ${isSignUp ? "-translate-x-full" : ""}`} aria-label="Authentication mode toggle">
-                    <div className={`bg-gradient-to-b from-[#659EB3] to-[#659EB3] text-[#FFFCEF] relative -left-full h-full w-[200%] transform transition-transform duration-500 ease-in-out flex items-center justify-center ${isSignUp ? "translate-x-1/2" : "translate-x-0"}`}>
+                    <div className={`bg-[#659EB3] text-white relative -left-full h-full w-[200%] transform transition-transform duration-500 ease-in-out flex items-center justify-center ${isSignUp ? "translate-x-1/2" : "translate-x-0"}`}>
                         
                         <article className={`w-1/2 h-full flex flex-col items-center justify-center px-12 text-center transform transition-transform duration-500 ease-in-out ${isSignUp ? "translate-x-0" : "-translate-x-[20%]"}`} aria-hidden={isSignUp}>
                             <h2 className="text-3xl font-bold mb-4">Welcome Back!</h2>
-                            <p className="mb-8 text-[#FFFCEF]">To keep connected with us please login with your personal info</p>
+                            <p className="mb-8">To keep connected with us please login with your personal info</p>
                             <button 
                                 onClick={() => handleToggle(false)} 
-                                className="border-2 border-[#FFFCEF] text-[#FFFCEF] rounded-full px-12 py-3 font-bold uppercase tracking-wider hover:bg-[#FFFCEF] hover:text-[#659EB3] transition-colors focus:outline-none focus:ring-2 focus:ring-[#FFFCEF]"
+                                className="border-2 border-white text-white rounded-full px-12 py-3 font-bold uppercase tracking-wider hover:bg-white hover:text-[#659EB3] transition-colors focus:outline-none focus:ring-2 focus:ring-white"
                                 aria-pressed={!isSignUp}
                                 aria-label="Switch to sign in mode"
                             >
@@ -157,10 +157,10 @@ function Login(): React.JSX.Element {
 
                         <article className={`w-1/2 h-full flex flex-col items-center justify-center px-12 text-center transform transition-transform duration-500 ease-in-out ${isSignUp ? "translate-x-[20%]" : "translate-x-0"}`} aria-hidden={!isSignUp}>
                             <h2 className="text-3xl font-bold mb-4">Hello, Friend!</h2>
-                            <p className="mb-8 text-[#FFFCEF]">Enter your personal details and start journey with us</p>
+                            <p className="mb-8">Enter your personal details and start journey with us</p>
                             <button 
                                 onClick={() => handleToggle(true)} 
-                                className="border-2 border-[#FFFCEF] text-[#FFFCEF] rounded-full px-12 py-3 font-bold uppercase tracking-wider hover:bg-[#FFFCEF] hover:text-[#8B7B8E] transition-colors focus:outline-none focus:ring-2 focus:ring-[#FFFCEF]"
+                                className="border-2 border-white text-white rounded-full px-12 py-3 font-bold uppercase tracking-wider hover:bg-white hover:text-[#659EB3] transition-colors focus:outline-none focus:ring-2 focus:ring-white"
                                 aria-pressed={isSignUp}
                                 aria-label="Switch to sign up mode"
                             >
