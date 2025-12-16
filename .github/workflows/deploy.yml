@@ -12,7 +12,7 @@ jobs:
   # JOB 1: BUILD & PUSH
   # ---------------------------------------------------
   build_and_push:
-    name: 🐳 Build & Push
+    name: 🐳 Build & Push Docker Image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -47,45 +47,17 @@ jobs:
   # JOB 2: DEPLOY
   # ---------------------------------------------------
   deploy:
-    name: 🚀 Deploy to K3s
+    name: 🚀 Deploy to ${{ github.ref_name == 'main' && 'Production' || 'Test' }}
     needs: build_and_push
     runs-on: ubuntu-latest
+    
+    environment: 
+      name: ${{ github.ref_name == 'main' && 'production' || 'test' }}
+      url: ${{ github.ref_name == 'main' && 'https://yigithankarabulut.com' || 'https://test.yigithankarabulut.com' }}
+
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set Environment Variables
-        run: |
-          if [ "${{ github.ref_name }}" == "main" ]; then
-            echo "NAMESPACE=prod" >> $GITHUB_ENV
-            echo "REPLICAS=2" >> $GITHUB_ENV
-            echo "APP_DOMAIN=yigithankarabulut.com" >> $GITHUB_ENV
-            echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
-          else
-            echo "NAMESPACE=test" >> $GITHUB_ENV
-            echo "REPLICAS=1" >> $GITHUB_ENV
-            echo "APP_DOMAIN=test.yigithankarabulut.com" >> $GITHUB_ENV
-            echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
-          fi
-          # Docker Username'i de ENV'e alalım ki envsubst görsün
-          echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> $GITHUB_ENV
-
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          envs: DOCKER_USERNAME,NAMESPACE,REPLICAS,APP_DOMAIN,IMAGE_TAG
-          script: |
-            kubectl get namespace $NAMESPACE > /dev/null 2>&1 || kubectl create namespace $NAMESPACE            
-            
-  deploy_apply:
-    name: 🚀 Apply Manifests
-    needs: build_and_push
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
       - name: Config Env
         run: |
           if [ "${{ github.ref_name }}" == "main" ]; then
@@ -103,10 +75,9 @@ jobs:
       - name: Render Manifests
         run: |
           mkdir -p k8s_rendered
-          # envsubst ile $VAR olan yerleri gerçek değerle değiştirip yeni klasöre kaydet
-          envsubst < deployment/deployment.yml > k8s_rendered/deployment.yaml
-          envsubst < deployment/service.yml > k8s_rendered/service.yaml
-          envsubst < deployment/ingress.yml > k8s_rendered/ingress.yaml
+          envsubst < deployment/deployment.yaml > k8s_rendered/deployment.yaml
+          envsubst < deployment/service.yaml > k8s_rendered/service.yaml
+          envsubst < deployment/ingress.yaml > k8s_rendered/ingress.yaml
 
       - name: Copy Files to Server
         uses: appleboy/scp-action@master
