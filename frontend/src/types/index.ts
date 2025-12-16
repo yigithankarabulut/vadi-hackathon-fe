@@ -1,3 +1,8 @@
+export interface TimeSeriesData {
+  timestamp: number;
+  value: number;
+}
+
 export interface Aircraft {
   id: string;
   name: string;
@@ -6,6 +11,10 @@ export interface Aircraft {
   speed: number;
   status: 'active' | 'inactive' | 'warning';
   route?: [number, number][];
+  motorTemp?: number;
+  externalTemp?: number;
+  speedHistory?: TimeSeriesData[];
+  altitudeHistory?: TimeSeriesData[];
 }
 
 export interface AlertItem {
