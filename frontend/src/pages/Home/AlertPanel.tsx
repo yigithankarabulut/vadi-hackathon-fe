@@ -34,42 +34,42 @@ export function AlertPanel({ alerts }: AlertPanelProps) {
   return (
     <section aria-labelledby="alerts-title">
       <Card>
-        <CardHeader>
-          <CardTitle id="alerts-title" className="flex items-center gap-2 text-[#659EB3]">
-            <Bell className="h-5 w-5" aria-hidden="true" />
-            Uyarılar ve Bildirimler
+        <CardHeader className="pb-3">
+          <CardTitle id="alerts-title" className="flex items-center gap-2 text-[#659EB3] text-base">
+            <Bell className="h-4 w-4" aria-hidden="true" />
+            Uyarılar
             {alerts.length > 0 && (
-              <Badge variant="destructive" className="ml-auto" aria-label={`${alerts.length} uyarı mevcut`}>
+              <Badge variant="destructive" className="ml-auto text-xs" aria-label={`${alerts.length} uyarı mevcut`}>
                 {alerts.length}
               </Badge>
             )}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3 max-h-[400px] overflow-y-auto" role="log" aria-live="polite" aria-atomic="false">
+        <CardContent className="pt-0">
+          <div className="space-y-2 max-h-[300px] overflow-y-auto" role="log" aria-live="polite" aria-atomic="false">
             {alerts.length === 0 ? (
-              <div className="text-center text-[#8B7B8E] py-8" role="status">
-                <Bell className="h-12 w-12 mx-auto mb-2 opacity-20" aria-hidden="true" />
-                <p>Henüz uyarı bulunmuyor</p>
+              <div className="text-center text-[#8B7B8E] py-6" role="status">
+                <Bell className="h-8 w-8 mx-auto mb-2 opacity-20" aria-hidden="true" />
+                <p className="text-sm">Henüz uyarı bulunmuyor</p>
               </div>
             ) : (
               alerts.map((alert) => (
                 <Alert 
                   key={alert.id} 
-                  className={getAlertColor(alert.type)}
+                  className={`${getAlertColor(alert.type)} py-2 px-3`}
                   role="alert"
                   aria-labelledby={`alert-${alert.id}-aircraft`}
                 >
-                  <div className="flex items-start gap-3">
-                    <span aria-hidden="true">{getAlertIcon(alert.type)}</span>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <span id={`alert-${alert.id}-aircraft`} className="font-semibold text-[#659EB3]">{alert.aircraftName}</span>
-                        <time className="text-xs text-[#8B7B8E]" dateTime={alert.timestamp.toISOString()}>
-                          {alert.timestamp.toLocaleTimeString('tr-TR')}
+                  <div className="flex items-start gap-2">
+                    <span aria-hidden="true" className="mt-0.5 flex-shrink-0">{getAlertIcon(alert.type)}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline gap-2 flex-wrap">
+                        <span id={`alert-${alert.id}-aircraft`} className="font-semibold text-[#659EB3] text-xs">{alert.aircraftName}</span>
+                        <time className="text-[10px] text-[#8B7B8E]" dateTime={alert.timestamp.toISOString()}>
+                          {alert.timestamp.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
                         </time>
                       </div>
-                      <AlertDescription className="text-[#8B7B8E]">{alert.message}</AlertDescription>
+                      <AlertDescription className="text-[#8B7B8E] text-[11px] leading-snug mt-0.5">{alert.message}</AlertDescription>
                     </div>
                   </div>
                 </Alert>
