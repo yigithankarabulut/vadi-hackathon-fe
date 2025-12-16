@@ -54,9 +54,10 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: 22
-          connect_timeout: 30s
+          timeout: 30s               # "connect_timeout" YANLIŞ, "timeout" DOĞRU
+          command_timeout: 20m       # İşlem uzun sürerse patlamasın
+          use_insecure_cipher: true  # ssh-rsa uyumluluğu için bu ŞART ama cipher listesi verme!
           script_stop: true
-          debug: true
           script: |
             NAMESPACE="test"
             DOMAIN="test.yigithankarabulut.com"
@@ -135,9 +136,10 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: 22
-          connect_timeout: 30s
+          timeout: 30s               # DÜZELTİLDİ
+          command_timeout: 20m       # EKLENDİ
+          use_insecure_cipher: true  # EKLENDİ (Listesiz)
           script_stop: true
-          debug: true
           script: |
             NAMESPACE="prod"
             DOMAIN="yigithankarabulut.com"
