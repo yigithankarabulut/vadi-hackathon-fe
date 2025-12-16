@@ -13,8 +13,8 @@ export function StatsPanel({
       title: 'Toplam Uçak',
       value: totalAircraft,
       icon: Plane,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100',
+      color: 'text-[#659EB3]',
+      bgColor: 'bg-[#659EB3]/10',
     },
     {
       title: 'Aktif',
@@ -46,8 +46,8 @@ export function StatsPanel({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">{stat.title}</p>
-                <p className="text-3xl mt-2">{stat.value}</p>
+                <p className="text-sm text-[#8B7B8E]">{stat.title}</p>
+                <p className="text-3xl mt-2 font-bold text-[#659EB3]">{stat.value}</p>
               </div>
               <div className={`${stat.bgColor} p-3 rounded-lg`}>
                 <stat.icon className={`h-6 w-6 ${stat.color}`} />

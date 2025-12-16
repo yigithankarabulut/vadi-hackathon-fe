@@ -145,17 +145,16 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm">
+    <div className="min-h-screen bg-[#FFFCEF]">
+      <header className="bg-white border-b border-[#659EB3]/20 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-3">
-            <div className="bg-blue-600 p-2 rounded-lg">
+            <div className="bg-[#659EB3] p-2 rounded-lg">
               <Plane className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl">IoT Canlı Filo Takip ve Uyarı Sistemi</h1>
-              <p className="text-sm text-gray-600">Gerçek zamanlı uçak izleme ve durum yönetimi</p>
+              <h1 className="text-2xl text-[#659EB3] font-bold">IoT Canlı Filo Takip ve Uyarı Sistemi</h1>
+              <p className="text-sm text-[#8B7B8E]">Gerçek zamanlı uçak izleme ve durum yönetimi</p>
             </div>
           </div>
         </div>
@@ -175,7 +174,7 @@ export default function HomePage() {
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
-                <CardTitle>Uçak Listesi</CardTitle>
+                <CardTitle className="text-[#659EB3]">Uçak Listesi</CardTitle>
               </CardHeader>
               <CardContent className="max-h-[600px] overflow-y-auto">
                 <AircraftList
@@ -190,7 +189,7 @@ export default function HomePage() {
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Canlı Harita</CardTitle>
+                <CardTitle className="text-[#659EB3]">Canlı Harita</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="h-[500px] rounded-lg overflow-hidden">
@@ -210,25 +209,25 @@ export default function HomePage() {
           <div className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Seçili Uçak Detayları - {selectedAircraft.name}</CardTitle>
+                <CardTitle className="text-[#659EB3]">Seçili Uçak Detayları - {selectedAircraft.name}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
-                    <p className="text-sm text-gray-600">Araç No</p>
-                    <p className="text-lg">{selectedAircraft.id}</p>
+                    <p className="text-sm text-[#8B7B8E]">Araç No</p>
+                    <p className="text-lg font-bold text-[#659EB3]">{selectedAircraft.id}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Yükseklik</p>
-                    <p className="text-lg">{selectedAircraft.altitude} ft</p>
+                    <p className="text-sm text-[#8B7B8E]">Yükseklik</p>
+                    <p className="text-lg font-bold text-[#659EB3]">{selectedAircraft.altitude} ft</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Hız</p>
-                    <p className="text-lg">{selectedAircraft.speed} kt</p>
+                    <p className="text-sm text-[#8B7B8E]">Hız</p>
+                    <p className="text-lg font-bold text-[#659EB3]">{selectedAircraft.speed} kt</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Konum</p>
-                    <p className="text-sm">
+                    <p className="text-sm text-[#8B7B8E]">Konum</p>
+                    <p className="text-sm font-medium text-[#659EB3]">
                       {selectedAircraft.position[0].toFixed(4)}, {selectedAircraft.position[1].toFixed(4)}
                     </p>
                   </div>

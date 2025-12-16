@@ -23,7 +23,7 @@ export function AircraftList({ aircrafts, selectedAircraft, onSelect }: Aircraft
         <Card
           key={aircraft.id}
           className={`cursor-pointer transition-all hover:shadow-md ${
-            selectedAircraft?.id === aircraft.id ? 'border-blue-500 border-2' : ''
+            selectedAircraft?.id === aircraft.id ? 'border-[#659EB3] border-2' : ''
           }`}
           onClick={() => onSelect(aircraft)}
         >
@@ -41,25 +41,25 @@ export function AircraftList({ aircrafts, selectedAircraft, onSelect }: Aircraft
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold">{aircraft.name}</h3>
+                    <h3 className="font-semibold text-[#659EB3]">{aircraft.name}</h3>
                     {getStatusBadge(aircraft.status)}
                   </div>
-                  <div className="mt-2 space-y-1 text-sm text-gray-600">
+                  <div className="mt-2 space-y-1 text-sm text-[#8B7B8E]">
                     <div className="flex justify-between">
                       <span>Araç No:</span>
-                      <span className="font-medium">{aircraft.id}</span>
+                      <span className="font-medium text-[#659EB3]">{aircraft.id}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Yükseklik:</span>
-                      <span className="font-medium">{aircraft.altitude} ft</span>
+                      <span className="font-medium text-[#659EB3]">{aircraft.altitude} ft</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Hız:</span>
-                      <span className="font-medium">{aircraft.speed} kt</span>
+                      <span className="font-medium text-[#659EB3]">{aircraft.speed} kt</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Konum:</span>
-                      <span className="font-medium text-xs">
+                      <span className="font-medium text-xs text-[#659EB3]">
                         {aircraft.position[0].toFixed(4)}, {aircraft.position[1].toFixed(4)}
                       </span>
                     </div>

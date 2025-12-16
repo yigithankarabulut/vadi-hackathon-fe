@@ -34,7 +34,7 @@ export function AlertPanel({ alerts }: AlertPanelProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-[#659EB3]">
           <Bell className="h-5 w-5" />
           Uyarılar ve Bildirimler
           {alerts.length > 0 && (
@@ -47,7 +47,7 @@ export function AlertPanel({ alerts }: AlertPanelProps) {
       <CardContent>
         <div className="space-y-3 max-h-[400px] overflow-y-auto">
           {alerts.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">
+            <div className="text-center text-[#8B7B8E] py-8">
               <Bell className="h-12 w-12 mx-auto mb-2 opacity-20" />
               <p>Henüz uyarı bulunmuyor</p>
             </div>
@@ -58,12 +58,12 @@ export function AlertPanel({ alerts }: AlertPanelProps) {
                   {getAlertIcon(alert.type)}
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="font-semibold">{alert.aircraftName}</span>
-                      <span className="text-xs text-gray-500">
+                      <span className="font-semibold text-[#659EB3]">{alert.aircraftName}</span>
+                      <span className="text-xs text-[#8B7B8E]">
                         {alert.timestamp.toLocaleTimeString('tr-TR')}
                       </span>
                     </div>
-                    <AlertDescription>{alert.message}</AlertDescription>
+                    <AlertDescription className="text-[#8B7B8E]">{alert.message}</AlertDescription>
                   </div>
                 </div>
               </Alert>
