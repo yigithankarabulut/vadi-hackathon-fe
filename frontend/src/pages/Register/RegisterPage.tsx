@@ -93,6 +93,7 @@ function Register({ isSignUp }: RegisterProps): React.JSX.Element {
                         aria-label="Username"
                         aria-invalid={!!errors.username}
                         aria-describedby={errors.username ? "signup-name-error" : undefined}
+                        autoFocus
                     />
                     {errors.username && (
                         <p id="signup-name-error" className="text-red-600 text-sm mt-1" role="alert">

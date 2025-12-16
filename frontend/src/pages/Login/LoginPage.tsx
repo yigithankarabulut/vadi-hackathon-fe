@@ -98,6 +98,7 @@ function Login(): React.JSX.Element {
                                 aria-label="Email address"
                                 aria-invalid={!!errors.email}
                                 aria-describedby={errors.email ? "signin-email-error" : undefined}
+                                autoFocus
                             />
                             {errors.email && (
                                 <p id="signin-email-error" className="text-red-600 text-sm mt-1" role="alert">
