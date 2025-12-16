@@ -47,81 +47,26 @@ jobs:
     if: github.ref == 'refs/heads/test'
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          port: 22
-          timeout: 30s               # "connect_timeout" YANLIŞ, "timeout" DOĞRU
-          command_timeout: 20m       # İşlem uzun sürerse patlamasın
-          use_insecure_cipher: true  # ssh-rsa uyumluluğu için bu ŞART ama cipher listesi verme!
-          script_stop: true
-          script: |
-            NAMESPACE="test"
-            DOMAIN="test.yigithankarabulut.com"
-            IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
-            
-            kubectl get namespace $NAMESPACE > /dev/null 2>&1 || kubectl create namespace $NAMESPACE
-            
-            cat <<EOF | kubectl apply -f -
-            apiVersion: apps/v1
-            kind: Deployment
-            metadata:
-              name: ${{ env.DEPLOYMENT_NAME }}
-              namespace: $NAMESPACE
-              labels:
-                app: ${{ env.DEPLOYMENT_NAME }}
-            spec:
-              replicas: 1
-              selector:
-                matchLabels:
-                  app: ${{ env.DEPLOYMENT_NAME }}
-              template:
-                metadata:
-                  labels:
-                    app: ${{ env.DEPLOYMENT_NAME }}
-                spec:
-                  containers:
-                  - name: frontend
-                    image: $IMAGE
-                    ports:
-                    - containerPort: 80
-            ---
-            apiVersion: v1
-            kind: Service
-            metadata:
-              name: ${{ env.DEPLOYMENT_NAME }}-service
-              namespace: $NAMESPACE
-            spec:
-              selector:
-                app: ${{ env.DEPLOYMENT_NAME }}
-              ports:
-                - protocol: TCP
-                  port: 80
-                  targetPort: 80
-            ---
-            apiVersion: networking.k8s.io/v1
-            kind: Ingress
-            metadata:
-              name: ${{ env.DEPLOYMENT_NAME }}-ingress
-              namespace: $NAMESPACE
-            spec:
-              rules:
-              - host: $DOMAIN
-                http:
-                  paths:
-                  - path: /
-                    pathType: Prefix
-                    backend:
-                      service:
-                        name: ${{ env.DEPLOYMENT_NAME }}-service
-                        port:
-                          number: 80
-            EOF
-            
-            kubectl rollout restart deployment/${{ env.DEPLOYMENT_NAME }} -n $NAMESPACE
+      # --- DEBUG MODU: SSH BAĞLANTISINI TEST ETME ADIMI ---
+      - name: DEBUG - Manual SSH Connection
+        run: |
+          echo "SSH Debugging basliyor..."
+          mkdir -p ~/.ssh
+          
+          # Key'i dosyaya yaz
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          # Key format kontrolü (Sadece başını sonunu gösterir)
+          echo "=== KEY KONTROLU ==="
+          head -n 2 ~/.ssh/id_rsa
+          echo "..."
+          tail -n 2 ~/.ssh/id_rsa
+          echo "===================="
+
+          # Verbose modda (-vvv) bağlanmayı dene
+          # StrictHostKeyChecking=no -> Sunucu fingerprint onayı sormasın
+          ssh -vvv -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo 'EGER BU YAZIYI GORUYORSAN BAGLANTI BASARILI DEMEKTIR'"
 
   deploy_prod:
     name: Deploy to PRODUCTION
@@ -129,78 +74,19 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          port: 22
-          timeout: 30s               # DÜZELTİLDİ
-          command_timeout: 20m       # EKLENDİ
-          use_insecure_cipher: true  # EKLENDİ (Listesiz)
-          script_stop: true
-          script: |
-            NAMESPACE="prod"
-            DOMAIN="yigithankarabulut.com"
-            IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
-            
-            kubectl get namespace $NAMESPACE > /dev/null 2>&1 || kubectl create namespace $NAMESPACE
-            
-            cat <<EOF | kubectl apply -f -
-            apiVersion: apps/v1
-            kind: Deployment
-            metadata:
-              name: ${{ env.DEPLOYMENT_NAME }}
-              namespace: $NAMESPACE
-              labels:
-                app: ${{ env.DEPLOYMENT_NAME }}
-            spec:
-              replicas: 2
-              selector:
-                matchLabels:
-                  app: ${{ env.DEPLOYMENT_NAME }}
-              template:
-                metadata:
-                  labels:
-                    app: ${{ env.DEPLOYMENT_NAME }}
-                spec:
-                  containers:
-                  - name: frontend
-                    image: $IMAGE
-                    ports:
-                    - containerPort: 80
-            ---
-            apiVersion: v1
-            kind: Service
-            metadata:
-              name: ${{ env.DEPLOYMENT_NAME }}-service
-              namespace: $NAMESPACE
-            spec:
-              selector:
-                app: ${{ env.DEPLOYMENT_NAME }}
-              ports:
-                - protocol: TCP
-                  port: 80
-                  targetPort: 80
-            ---
-            apiVersion: networking.k8s.io/v1
-            kind: Ingress
-            metadata:
-              name: ${{ env.DEPLOYMENT_NAME }}-ingress
-              namespace: $NAMESPACE
-            spec:
-              rules:
-              - host: $DOMAIN
-                http:
-                  paths:
-                  - path: /
-                    pathType: Prefix
-                    backend:
-                      service:
-                        name: ${{ env.DEPLOYMENT_NAME }}-service
-                        port:
-                          number: 80
-            EOF
-            
-            kubectl rollout restart deployment/${{ env.DEPLOYMENT_NAME }} -n $NAMESPACE
+      # --- DEBUG MODU: SSH BAĞLANTISINI TEST ETME ADIMI ---
+      - name: DEBUG - Manual SSH Connection
+        run: |
+          echo "SSH Debugging basliyor..."
+          mkdir -p ~/.ssh
+          
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          echo "=== KEY KONTROLU ==="
+          head -n 2 ~/.ssh/id_rsa
+          echo "..."
+          tail -n 2 ~/.ssh/id_rsa
+          echo "===================="
+
+          ssh -vvv -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo 'EGER BU YAZIYI GORUYORSAN BAGLANTI BASARILI DEMEKTIR'"
