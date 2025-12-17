@@ -10,10 +10,11 @@ function Register({ isSignUp }: RegisterProps): React.JSX.Element {
     const [formData, setFormData] = useState({
         username: "",
         email: "",
-        password: ""
+        password: "",
+        confirmPassword: ""
     });
     const [isLoading, setIsLoading] = useState(false);
-    const [errors, setErrors] = useState<{ username?: string; email?: string; password?: string }>({});
+    const [errors, setErrors] = useState<{ username?: string; email?: string; password?: string; confirmPassword?: string }>({});
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
@@ -23,11 +24,13 @@ function Register({ isSignUp }: RegisterProps): React.JSX.Element {
             setFormData(prev => ({ ...prev, email: value }));
         } else if (id === "signup-password") {
             setFormData(prev => ({ ...prev, password: value }));
+        } else if (id === "signup-confirm-password") {
+            setFormData(prev => ({ ...prev, confirmPassword: value }));
         }
     };
 
     const validateForm = (): boolean => {
-        const newErrors: { username?: string; email?: string; password?: string } = {};
+        const newErrors: { username?: string; email?: string; password?: string; confirmPassword?: string } = {};
         
         if (!formData.username) {
             newErrors.username = "Kullanıcı adı gereklidir";
@@ -45,6 +48,12 @@ function Register({ isSignUp }: RegisterProps): React.JSX.Element {
             newErrors.password = "Şifre gereklidir";
         } else if (formData.password.length < 6) {
             newErrors.password = "Şifre en az 6 karakter olmalıdır";
+        }
+        
+        if (!formData.confirmPassword) {
+            newErrors.confirmPassword = "Şifre tekrarı gereklidir";
+        } else if (formData.password !== formData.confirmPassword) {
+            newErrors.confirmPassword = "Şifreler eşleşmiyor";
         }
         
         setErrors(newErrors);
@@ -67,7 +76,7 @@ function Register({ isSignUp }: RegisterProps): React.JSX.Element {
         );
         
         if (response.success) {
-            setFormData({ username: "", email: "", password: "" });
+            setFormData({ username: "", email: "", password: "", confirmPassword: "" });
             setErrors({});
         }
         
@@ -75,17 +84,17 @@ function Register({ isSignUp }: RegisterProps): React.JSX.Element {
     };
 
     return (
-        <section className={`absolute top-0 left-0 h-full w-1/2 flex flex-col justify-center p-12 bg-white transition-all duration-500 ease-in-out ${isSignUp ? "translate-x-full opacity-100 z-10" : "opacity-0 z-0"}`} aria-label="Sign up form" aria-hidden={!isSignUp}>
+        <section className={`absolute top-0 left-0 h-full w-1/2 flex flex-col justify-center p-12 bg-white transition-all duration-500 ease-in-out ${isSignUp ? "translate-x-full opacity-100 z-10" : "opacity-0 z-0"}`} aria-label="Kayıt Ol" aria-hidden={!isSignUp}>
             <form className="flex flex-col gap-4 h-full justify-center text-center" onSubmit={handleSubmit} noValidate>
-                <h1 className="text-3xl font-bold mb-4 text-[#659EB3]">Create Account</h1>
-                <p className="text-sm text-[#8B7B8E] mb-6">use your email for registration</p>
+                <h1 className="text-3xl font-bold mb-4 text-[#659EB3]">Hesap Oluştur</h1>
+                <p className="text-sm text-[#8B7B8E] mb-6">Kaydolmak için e-postanızı kullanın</p>
                 
                 <div>
-                    <label htmlFor="signup-name" className="block text-sm font-medium text-[#8B7B8E] mb-2">Username <span className="text-red-600" aria-label="required">*</span></label>
+                    <label htmlFor="signup-name" className="block text-sm font-medium text-[#8B7B8E] mb-2">Kullanıcı Adı <span className="text-red-600" aria-label="required">*</span></label>
                     <TextInput 
                         id="signup-name" 
                         type="text" 
-                        placeholder="Enter your username" 
+                        placeholder="Kullanıcı adınızı girin" 
                         required 
                         className="bg-[#659EB3]/10 text-[#4E5C6B] placeholder:text-[#8B7B8E]/60 border-[#659EB3]/30"
                         value={formData.username}
@@ -103,11 +112,11 @@ function Register({ isSignUp }: RegisterProps): React.JSX.Element {
                 </div>
 
                 <div>
-                    <label htmlFor="signup-email" className="block text-sm font-medium text-[#8B7B8E] mb-2">Email Address <span className="text-red-600" aria-label="required">*</span></label>
+                    <label htmlFor="signup-email" className="block text-sm font-medium text-[#8B7B8E] mb-2">E-posta <span className="text-red-600" aria-label="required">*</span></label>
                     <TextInput 
                         id="signup-email" 
                         type="email" 
-                        placeholder="Enter your email" 
+                        placeholder="E-postanızı girin" 
                         required 
                         className="bg-[#659EB3]/10 text-[#4E5C6B] placeholder:text-[#8B7B8E]/60 border-[#659EB3]/30"
                         value={formData.email}
@@ -124,11 +133,11 @@ function Register({ isSignUp }: RegisterProps): React.JSX.Element {
                 </div>
 
                 <div>
-                    <label htmlFor="signup-password" className="block text-sm font-medium text-[#8B7B8E] mb-2">Password <span className="text-red-600" aria-label="required">*</span></label>
+                    <label htmlFor="signup-password" className="block text-sm font-medium text-[#8B7B8E] mb-2">Şifre <span className="text-red-600" aria-label="required">*</span></label>
                     <TextInput 
                         id="signup-password" 
                         type="password" 
-                        placeholder="Enter your password" 
+                        placeholder="Şifrenizi girin" 
                         required 
                         className="bg-[#659EB3]/10 text-[#4E5C6B] placeholder:text-[#8B7B8E]/60 border-[#659EB3]/30"
                         value={formData.password}
@@ -140,6 +149,27 @@ function Register({ isSignUp }: RegisterProps): React.JSX.Element {
                     {errors.password && (
                         <p id="signup-password-error" className="text-red-600 text-sm mt-1" role="alert">
                             {errors.password}
+                        </p>
+                    )}
+                </div>
+
+                <div>
+                    <label htmlFor="signup-confirm-password" className="block text-sm font-medium text-[#8B7B8E] mb-2">Şifre Tekrarı <span className="text-red-600" aria-label="required">*</span></label>
+                    <TextInput 
+                        id="signup-confirm-password" 
+                        type="password" 
+                        placeholder="Yeniden şifrenizi girin" 
+                        required 
+                        className="bg-[#659EB3]/10 text-[#4E5C6B] placeholder:text-[#8B7B8E]/60 border-[#659EB3]/30"
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        aria-label="Confirm password"
+                        aria-invalid={!!errors.confirmPassword}
+                        aria-describedby={errors.confirmPassword ? "signup-confirm-password-error" : undefined}
+                    />
+                    {errors.confirmPassword && (
+                        <p id="signup-confirm-password-error" className="text-red-600 text-sm mt-1" role="alert">
+                            {errors.confirmPassword}
                         </p>
                     )}
                 </div>
