@@ -13,17 +13,26 @@ L.Icon.Default.mergeOptions({
 
 export function AircraftMap({ aircrafts, onAircraftClick }: AircraftMapProps) {
   const mapRef = useRef<L.Map | null>(null);
-  const markersRef = useRef<Map<string, L.Marker>>(new Map());
-  const routesRef = useRef<Map<string, L.Polyline>>(new Map());
+  //const markersRef = useRef<Map<string, L.Marker>>(new Map());
+  //const routesRef = useRef<Map<string, L.Polyline>>(new Map());
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
+
+  /*
+  useEffect(() => {
+    aircrafts.forEach((aircraft) => {
+      console.log('Aircraft ID:', aircraft.id, 'Position:', aircraft.position);
+
+    });
+  });
+*/
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
     const map = L.map(mapContainerRef.current, {
       keyboard: true,
       keyboardPanDelta: 80,
-    }).setView([39.9334, 32.8597], 11);
+    }).setView([39.9334, 32.8597], 9);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -36,8 +45,19 @@ export function AircraftMap({ aircrafts, onAircraftClick }: AircraftMapProps) {
       popupAnchor: [0, -16],
     });
     
-    var planeMarker = L.marker([39.9334, 32.8597], { icon: planeIcon }).addTo(map);
+    aircrafts.forEach((aircraft) => {
+       var planeMarker = L.marker([aircraft.position[0], aircraft.position[1]], { icon: planeIcon }).addTo(map);
+       planeMarker.on('click', () => {
+        onAircraftClick?.(aircraft);
+      });
+       setInterval(() => {
+          const newLat = aircraft.position[0] + (Math.random() - 0.5) * 0.01;
+          const newLng = aircraft.position[1] + (Math.random() - 0.5) * 0.01;
+          planeMarker.setLatLng([newLat, newLng]);
+        }, 1000);
+      });
 
+    /*
     let lat = 39.9334;
     let lon = 32.8597;
 
@@ -46,7 +66,7 @@ export function AircraftMap({ aircrafts, onAircraftClick }: AircraftMapProps) {
       lon += 0.001;
       planeMarker.setLatLng([lat, lon]);
     }, 1000);
-
+    */
     mapRef.current = map;
 
     return () => {
@@ -54,7 +74,7 @@ export function AircraftMap({ aircrafts, onAircraftClick }: AircraftMapProps) {
       mapRef.current = null;
     };
   }, []);
-
+/*
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -171,7 +191,7 @@ export function AircraftMap({ aircrafts, onAircraftClick }: AircraftMapProps) {
         }
       }
     });
-  }, [aircrafts, onAircraftClick]);
+  }, [aircrafts, onAircraftClick]);*/
 
   return (
     <div 
