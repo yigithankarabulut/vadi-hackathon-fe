@@ -15,10 +15,6 @@ Bu proje, araç filolarından gelen yüksek frekanslı telemetri verilerini (GPS
 - [Sistem Mimarisi](#-sistem-mimarisi)
 - [Teknoloji Yığını](#-teknoloji-yığını)
 - [Temel Özellikler](#-temel-özellikler)
-- [Dayanıklılık: Redis Fallback](#-dayanıklılık-redis-fallback)
-- [Kurulum ve Çalıştırma](#-kurulum-ve-çalıştırma)
-- [Gözlemlenebilirlik](#-gözlemlenebilirlik)
-- [Lisans](#-lisans)
 
 ---
 
