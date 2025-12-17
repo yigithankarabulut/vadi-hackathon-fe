@@ -66,27 +66,28 @@ function Login(): React.JSX.Element {
         
         setIsLoading(true);
         
-        
         const response = await apiService.login(loginData.email, loginData.password);
         
-        if (response.success) {
+        if (response.success && response.data) {
             setLoginData({ email: "", password: "" });
             setErrors({});
-            console.log(response.data);
-            // localStorage.setItem('token', response.data?.token);
-            // navigate('/dashboard');
+            
+            setCookie("access_token", response.data.accessToken);
+
+            const userData: User = {
+                id: response.data.userId,
+                access_token: response.data.accessToken,
+                email: loginData.email,
+                role: response.data.role,
+            };
+            
+            setContext(userData);
+            navigate('/home');
+        } else {
+            setErrors({ email: response.message || 'Giriş başarısız' });
+            console.error('Login failed:', response.error);
         }
         
-
-        const userData : User = {
-            id:1,
-            access_token:"dasdasd",
-            email: loginData.email,
-            name: "omus",
-            role: "admin",
-        }
-        setCookie("access_token", userData.access_token);
-        setContext(userData);
         setIsLoading(false);
     };
 

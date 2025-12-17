@@ -14,15 +14,15 @@ export const TemperatureBar: React.FC<TemperatureBarProps> = ({
   externalThreshold = 40,
 }) => {
   const getMotorColor = () => {
-    if (motorTemp >= motorThreshold) return '#ef4444'; // Red - Danger
-    if (motorTemp >= motorThreshold * 0.8) return '#f59e0b'; // Amber - Warning
-    return '#659EB3'; // Vintage Denim - Normal
+    if (motorTemp >= motorThreshold) return '#ef4444';
+    if (motorTemp >= motorThreshold * 0.8) return '#f59e0b';
+    return '#659EB3';
   };
 
   const getExternalColor = () => {
-    if (externalTemp >= externalThreshold) return '#ef4444'; // Red - Danger
-    if (externalTemp >= externalThreshold * 0.8) return '#f59e0b'; // Amber - Warning
-    return '#8B7B8E'; // Dusty Mauve - Normal
+    if (externalTemp >= externalThreshold) return '#ef4444';
+    if (externalTemp >= externalThreshold * 0.8) return '#f59e0b';
+    return '#8B7B8E';
   };
 
   const motorPercentage = Math.min((motorTemp / 120) * 100, 100);
@@ -30,7 +30,7 @@ export const TemperatureBar: React.FC<TemperatureBarProps> = ({
 
   return (
     <div className="space-y-3" role="region" aria-label="Sıcaklık göstergeleri">
-      {/* Motor Temperature */}
+      {}
       <div className="space-y-1">
         <div className="flex justify-between items-center">
           <h4 className="text-xs font-semibold text-gray-700">Motor Sıcaklığı</h4>
@@ -54,7 +54,7 @@ export const TemperatureBar: React.FC<TemperatureBarProps> = ({
             aria-hidden="true"
           />
           
-          {/* Threshold Indicator */}
+          {}
           <div
             className="absolute top-0 bottom-0 w-0.5 bg-gray-700"
             style={{ left: `${(motorThreshold / 120) * 100}%` }}
@@ -73,7 +73,7 @@ export const TemperatureBar: React.FC<TemperatureBarProps> = ({
         </div>
       </div>
 
-      {/* External Temperature */}
+      {}
       <div className="space-y-1">
         <div className="flex justify-between items-center">
           <h4 className="text-xs font-semibold text-gray-700">Dış Sıcaklık</h4>
@@ -97,7 +97,7 @@ export const TemperatureBar: React.FC<TemperatureBarProps> = ({
             aria-hidden="true"
           />
           
-          {/* Threshold Indicator */}
+          {}
           <div
             className="absolute top-0 bottom-0 w-0.5 bg-gray-700"
             style={{ left: `${(externalThreshold / 60) * 100}%` }}

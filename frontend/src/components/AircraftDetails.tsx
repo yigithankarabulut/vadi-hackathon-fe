@@ -17,7 +17,7 @@ export function AircraftDetails({ aircraft, onClose }: AircraftDetailsProps) {
       role="complementary"
       aria-labelledby="aircraft-details-title"
     >
-      {/* Header */}
+      {}
       <div className="flex justify-between items-start gap-2 bg-white p-3 rounded-lg shadow-sm">
         <div className="min-w-0 flex-1">
           <h2 
@@ -39,19 +39,19 @@ export function AircraftDetails({ aircraft, onClose }: AircraftDetailsProps) {
         )}
       </div>
 
-      {/* Real-time Metrics */}
+      {}
       <div className="grid grid-cols-1 gap-3">
-        {/* Speed Gauge */}
+        {}
         <div className="bg-[#FFFCEF] p-3 rounded-lg shadow-sm">
           <SpeedGauge speed={aircraft.speed} />
         </div>
 
-        {/* Altitude Bar */}
+        {}
         <div className="bg-[#FFFCEF] p-3 rounded-lg shadow-sm">
           <AltitudeBar altitude={aircraft.altitude} />
         </div>
 
-        {/* Temperature Bars */}
+        {}
         <div className="bg-[#FFFCEF] p-3 rounded-lg shadow-sm">
           <h3 className="text-sm font-semibold text-gray-800 mb-2">Sıcaklık</h3>
           <TemperatureBar
@@ -61,7 +61,7 @@ export function AircraftDetails({ aircraft, onClose }: AircraftDetailsProps) {
         </div>
       </div>
 
-      {/* Time Series Chart */}
+      {}
       <div className="bg-[#FFFCEF] p-3 rounded-lg shadow-sm">
         <TimeSeriesChart
           speedHistory={aircraft.speedHistory}
@@ -69,7 +69,7 @@ export function AircraftDetails({ aircraft, onClose }: AircraftDetailsProps) {
         />
       </div>
 
-      {/* Additional Info */}
+      {}
       <div className="bg-white p-3 rounded-lg shadow-sm">
         <h3 className="text-sm font-semibold text-gray-800 mb-2">Ek Bilgiler</h3>
         <dl className="grid grid-cols-1 gap-2 text-xs">

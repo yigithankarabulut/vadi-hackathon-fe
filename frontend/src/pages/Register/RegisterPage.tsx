@@ -1,25 +1,30 @@
 import { Button, TextInput } from "flowbite-react";
 import React, { useState } from "react";
 import { apiService } from "../../services";
+import { useNavigate } from "react-router-dom";
 
 type RegisterProps = {
     isSignUp: boolean;
 };
 
 function Register({ isSignUp }: RegisterProps): React.JSX.Element {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        username: "",
+        first_name: "",
+        last_name: "",
         email: "",
         password: "",
         confirmPassword: ""
     });
     const [isLoading, setIsLoading] = useState(false);
-    const [errors, setErrors] = useState<{ username?: string; email?: string; password?: string; confirmPassword?: string }>({});
+    const [errors, setErrors] = useState<{ first_name?: string; last_name?: string; email?: string; password?: string; confirmPassword?: string; general?: string }>({});
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
         if (id === "signup-name") {
-            setFormData(prev => ({ ...prev, username: value }));
+            setFormData(prev => ({ ...prev, first_name: value }));
+        } else if (id === "signup-lastname") {
+            setFormData(prev => ({ ...prev, last_name: value }));
         } else if (id === "signup-email") {
             setFormData(prev => ({ ...prev, email: value }));
         } else if (id === "signup-password") {
@@ -30,12 +35,18 @@ function Register({ isSignUp }: RegisterProps): React.JSX.Element {
     };
 
     const validateForm = (): boolean => {
-        const newErrors: { username?: string; email?: string; password?: string; confirmPassword?: string } = {};
+        const newErrors: { first_name?: string; last_name?: string; email?: string; password?: string; confirmPassword?: string } = {};
         
-        if (!formData.username) {
-            newErrors.username = "Kullanıcı adı gereklidir";
-        } else if (formData.username.length < 3) {
-            newErrors.username = "Kullanıcı adı en az 3 karakter olmalıdır";
+        if (!formData.first_name) {
+            newErrors.first_name = "Ad gereklidir";
+        } else if (formData.first_name.length < 2) {
+            newErrors.first_name = "Ad en az 2 karakter olmalıdır";
+        }
+
+        if (!formData.last_name) {
+            newErrors.last_name = "Soyadı gereklidir";
+        } else if (formData.last_name.length < 2) {
+            newErrors.last_name = "Soyadı en az 2 karakter olmalıdır";
         }
         
         if (!formData.email) {
@@ -70,14 +81,21 @@ function Register({ isSignUp }: RegisterProps): React.JSX.Element {
         setIsLoading(true);
         
         const response = await apiService.register(
-            formData.username,
             formData.email,
-            formData.password
+            formData.password,
+            formData.first_name,
+            formData.last_name,
+            "user"
         );
         
         if (response.success) {
-            setFormData({ username: "", email: "", password: "", confirmPassword: "" });
+            setFormData({ first_name: "", last_name: "", email: "", password: "", confirmPassword: "" });
             setErrors({});
+
+            navigate('/login');
+        } else {
+            setErrors({ general: response.message || "Kayıt başarısız" });
+            console.error('Registration failed:', response.error);
         }
         
         setIsLoading(false);
@@ -85,28 +103,55 @@ function Register({ isSignUp }: RegisterProps): React.JSX.Element {
 
     return (
         <section className={`absolute top-0 left-0 h-full w-1/2 flex flex-col justify-center p-12 bg-white transition-all duration-500 ease-in-out ${isSignUp ? "translate-x-full opacity-100 z-10" : "opacity-0 z-0"}`} aria-label="Kayıt Ol" aria-hidden={!isSignUp}>
-            <form className="flex flex-col gap-4 h-full justify-center text-center" onSubmit={handleSubmit} noValidate>
+            <form className="flex flex-col gap-4 h-full justify-center text-center overflow-y-auto max-h-[90vh]" onSubmit={handleSubmit} noValidate>
                 <h1 className="text-3xl font-bold mb-4 text-[#659EB3]">Hesap Oluştur</h1>
-                <p className="text-sm text-[#8B7B8E] mb-6">Kaydolmak için e-postanızı kullanın</p>
+                <p className="text-sm text-[#8B7B8E] mb-6">Yeni hesabınızı oluşturmak için bilgilerinizi girin</p>
                 
+                {errors.general && (
+                    <p className="text-red-600 text-sm bg-red-50 p-2 rounded" role="alert">
+                        {errors.general}
+                    </p>
+                )}
+
                 <div>
-                    <label htmlFor="signup-name" className="block text-sm font-medium text-[#8B7B8E] mb-2">Kullanıcı Adı <span className="text-red-600" aria-label="required">*</span></label>
+                    <label htmlFor="signup-name" className="block text-sm font-medium text-[#8B7B8E] mb-2">Ad <span className="text-red-600" aria-label="required">*</span></label>
                     <TextInput 
                         id="signup-name" 
                         type="text" 
-                        placeholder="Kullanıcı adınızı girin" 
+                        placeholder="Adınızı girin" 
                         required 
                         className="bg-[#659EB3]/10 text-[#4E5C6B] placeholder:text-[#8B7B8E]/60 border-[#659EB3]/30"
-                        value={formData.username}
+                        value={formData.first_name}
                         onChange={handleInputChange}
-                        aria-label="Username"
-                        aria-invalid={!!errors.username}
-                        aria-describedby={errors.username ? "signup-name-error" : undefined}
+                        aria-label="First name"
+                        aria-invalid={!!errors.first_name}
+                        aria-describedby={errors.first_name ? "signup-name-error" : undefined}
                         autoFocus
                     />
-                    {errors.username && (
+                    {errors.first_name && (
                         <p id="signup-name-error" className="text-red-600 text-sm mt-1" role="alert">
-                            {errors.username}
+                            {errors.first_name}
+                        </p>
+                    )}
+                </div>
+
+                <div>
+                    <label htmlFor="signup-lastname" className="block text-sm font-medium text-[#8B7B8E] mb-2">Soyadı <span className="text-red-600" aria-label="required">*</span></label>
+                    <TextInput 
+                        id="signup-lastname" 
+                        type="text" 
+                        placeholder="Soyadınızı girin" 
+                        required 
+                        className="bg-[#659EB3]/10 text-[#4E5C6B] placeholder:text-[#8B7B8E]/60 border-[#659EB3]/30"
+                        value={formData.last_name}
+                        onChange={handleInputChange}
+                        aria-label="Last name"
+                        aria-invalid={!!errors.last_name}
+                        aria-describedby={errors.last_name ? "signup-lastname-error" : undefined}
+                    />
+                    {errors.last_name && (
+                        <p id="signup-lastname-error" className="text-red-600 text-sm mt-1" role="alert">
+                            {errors.last_name}
                         </p>
                     )}
                 </div>
@@ -180,7 +225,7 @@ function Register({ isSignUp }: RegisterProps): React.JSX.Element {
                     disabled={isLoading}
                     aria-busy={isLoading}
                 >
-                    {isLoading ? "Kaydediliyor..." : "Sign Up"}
+                    {isLoading ? "Kaydediliyor..." : "Kayıt Ol"}
                 </Button>
             </form>
         </section>

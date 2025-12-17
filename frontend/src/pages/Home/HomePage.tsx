@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AircraftMap } from './AircraftMap';
 import { AlertPanel } from './AlertPanel';
 import { StatsPanel } from './StatsPanel';
@@ -7,20 +8,55 @@ import type { Aircraft, AlertItem } from '../../types';
 import { generateMockAlerts, generateMockAircrafts } from './utils';
 import { LeftPanel } from './LeftPanel';
 import { RightPanel } from './RightPanel';
-import { Menu, LogOut, User, Plane, Bell, Settings } from 'lucide-react';
+import { Menu, LogOut, User, Plane, Bell, Settings, Loader2 } from 'lucide-react';
+import { useAircrafts } from '../../hooks/useAircrafts';
+import { useUser } from '../../context/UserContext';
 
 export default function HomePage() {
-  const [aircrafts] = useState<Aircraft[]>(generateMockAircrafts());
+  const navigate = useNavigate();
+  const { user, isLoggedIn, isLoading: authLoading, removeContext } = useUser();
+  const [pseudoAirCrafts, setPseudoAirCrafts] = useState<Aircraft[] | undefined>(generateMockAircrafts());
+  const { aircrafts, isLoading, error, refetch } = useAircrafts({ 
+    autoFetch: true, 
+    refreshInterval: 30000
+  });
   const [selectedAircraft, setSelectedAircraft] = useState<Aircraft | undefined>();
   const [alerts] = useState<AlertItem[]>(generateMockAlerts());
+  
+
+  useEffect(() => {
+    
+    if (!authLoading && !isLoggedIn) {
+      navigate('/login');
+    }
+  }, [authLoading, isLoggedIn, navigate]);
+
+  useEffect(() => {
+    if (selectedAircraft && !aircrafts.find(a => a.id === selectedAircraft.id)) {
+      setSelectedAircraft(undefined);
+    }
+  }, [aircrafts, selectedAircraft]);
   const [leftPanelOpen, setLeftPanelOpen] = useState<boolean>(false);
   const [rightPanelOpen, setRightPanelOpen] = useState<boolean>(false);
   const [showUserMenu, setShowUserMenu] = useState<boolean>(false);
 
   const handleLogout = () => {
     console.log('Logging out...');
-    window.location.href = '/login';
+    removeContext();
+    navigate('/login');
   };
+
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#FFFCEF] via-white to-[#F5F0E8] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-12 h-12 text-[#659EB3] animate-spin" />
+          <span className="text-[#8B7B8E] font-medium">Yükleniyor...</span>
+        </div>
+      </div>
+    );
+  }
 
   const stats = {
     total: aircrafts.length,
@@ -31,8 +67,10 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FFFCEF] via-white to-[#F5F0E8]">
+      {}
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[#659EB3]/10 shadow-xl transition-all duration-300">
         <div className="container mx-auto px-3 sm:px-4 py-3 flex items-center justify-between">
+          {}
           <div className="flex items-center gap-3">
             <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-[#659EB3] via-[#5088a3] to-[#3f7a94] flex items-center justify-center shadow-lg group hover:shadow-2xl transition-all duration-300">
               <Plane className="w-5 h-5 text-white group-hover:scale-110 transition-transform duration-300" />
@@ -46,6 +84,7 @@ export default function HomePage() {
             </div>
           </div>
 
+          {}
           <div className="hidden md:flex items-center gap-4">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-green-500/10 to-green-600/5 border border-green-500/20">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
@@ -57,16 +96,20 @@ export default function HomePage() {
             </div>
           </div>
 
+          {}
           <div className="flex items-center gap-2 sm:gap-3">
+            {}
             <button className="relative p-2 rounded-lg bg-[#659EB3]/5 hover:bg-[#659EB3]/10 text-[#659EB3] transition-all duration-300 group">
               <Bell className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
             </button>
 
+            {}
             <button className="p-2 rounded-lg bg-[#659EB3]/5 hover:bg-[#659EB3]/10 text-[#659EB3] transition-all duration-300 group">
               <Settings className="w-5 h-5 group-hover:scale-110 group-hover:rotate-90 transition-all duration-300" />
             </button>
 
+            {}
             <div className="relative">
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
@@ -74,14 +117,15 @@ export default function HomePage() {
                 aria-label="Kullanıcı menüsü"
               >
                 <User className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-                <span className="hidden sm:inline text-sm font-medium">Admin</span>
+                <span className="hidden sm:inline text-sm font-medium capitalize">{user?.role || 'Kullanıcı'}</span>
               </button>
 
+              {}
               {showUserMenu && (
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-[#659EB3]/10 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="px-4 py-4 border-b border-[#659EB3]/10 bg-gradient-to-r from-[#659EB3]/5 via-transparent to-[#8B7B8E]/5">
-                    <p className="text-sm font-bold text-[#659EB3]">Admin User</p>
-                    <p className="text-xs text-[#8B7B8E] mt-1.5">admin@airtrack.com</p>
+                    <p className="text-sm font-bold text-[#659EB3] capitalize">{user?.role || 'Kullanıcı'}</p>
+                    <p className="text-xs text-[#8B7B8E] mt-1.5">{user?.email || ''}</p>
                   </div>
 
                   <div className="p-2">
@@ -107,6 +151,7 @@ export default function HomePage() {
         </div>
       </nav>
 
+      {}
       {!leftPanelOpen && (
         <button
           onClick={() => setLeftPanelOpen(true)}
@@ -132,6 +177,7 @@ export default function HomePage() {
       )}
 
       <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-8" role="main">
+        {}
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-1 h-8 rounded-full bg-gradient-to-b from-[#659EB3] to-[#5088a3]"></div>
@@ -144,6 +190,7 @@ export default function HomePage() {
           </p>
         </div>
 
+        {}
         <section className="mb-8" aria-label="İstatistikler">
           <StatsPanel
             totalAircraft={stats.total}
@@ -153,8 +200,10 @@ export default function HomePage() {
           />
         </section>
 
+        {}
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6">
           
+          {}
           {leftPanelOpen && (
             <div className="xl:col-span-3 animate-slide-in-left">
               <LeftPanel
@@ -165,7 +214,7 @@ export default function HomePage() {
             </div>
           )}
 
-          {/* Center - Map */}
+          {}
           <div
             className={`space-y-6 transition-all duration-300 ${
               leftPanelOpen && rightPanelOpen ? 'xl:col-span-6' :
@@ -173,7 +222,7 @@ export default function HomePage() {
               'xl:col-span-12'
             }`}
           >
-            {/* Map Card */}
+            {}
             <section aria-labelledby="map-title" className="animate-fade-in">
               <Card className="shadow-2xl border-0 overflow-hidden h-fit hover:shadow-2xl transition-shadow duration-300 group">
                 <CardHeader className="bg-gradient-to-r from-[#659EB3]/10 via-transparent to-[#8B7B8E]/5 border-b-2 border-[#659EB3]/10 pb-4">
@@ -189,25 +238,55 @@ export default function HomePage() {
                     role="img"
                     aria-label="Uçak konumlarını gösteren canlı harita"
                   >
+                    {isLoading && aircrafts.length === 0 ? (
+                      <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+                        <div className="flex flex-col items-center gap-3">
+                          <Loader2 className="w-8 h-8 text-[#659EB3] animate-spin" />
+                          <span className="text-sm text-[#8B7B8E] font-medium">Uçaklar yükleniyor...</span>
+                        </div>
+                      </div>
+                    ) : error ? (
+                      <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+                        <div className="flex flex-col items-center gap-3 text-center px-4">
+                          <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                            <span className="text-red-500 text-xl">⚠️</span>
+                          </div>
+                          <span className="text-sm text-red-600 font-medium">{error}</span>
+                          <button 
+                            onClick={refetch}
+                            className="px-4 py-2 bg-[#659EB3] text-white rounded-lg text-sm font-medium hover:bg-[#5088a3] transition-colors"
+                          >
+                            Tekrar Dene
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
                     <AircraftMap
-                      aircrafts={aircrafts}
-                      onAircraftClick={setSelectedAircraft}
+                      aircrafts={pseudoAirCrafts}
+                      onAircraftClick={setPseudoAirCrafts}
                     />
                     <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-white/90 backdrop-blur-md px-3 sm:px-4 py-2 sm:py-2.5 rounded-full shadow-xl text-xs sm:text-sm text-[#8B7B8E] font-bold border border-[#659EB3]/20 hover:border-[#659EB3]/40 transition-all duration-300">
-                      ✈️ {aircrafts.length} Uçak
+                      {isLoading ? (
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                          Yenileniyor...
+                        </span>
+                      ) : (
+                        <>✈️ {aircrafts.length} Uçak</>
+                      )}
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </section>
 
-            {/* Alerts */}
+            {}
             <section aria-labelledby="alerts-title" className="animate-fade-in">
               <AlertPanel alerts={alerts} />
             </section>
           </div>
 
-          {/* Right Panel */}
+          {}
           {rightPanelOpen && (
             <div className="xl:col-span-3 animate-slide-in-right">
               <RightPanel
@@ -226,7 +305,7 @@ export default function HomePage() {
         </div>
       </main>
 
-      {/* Animations */}
+      {}
       <style>{`
         @keyframes fade-in {
           from {

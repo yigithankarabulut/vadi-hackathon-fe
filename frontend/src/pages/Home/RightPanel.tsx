@@ -18,7 +18,7 @@ export function RightPanel({ selectedAircraft, onAircraftClick, onClose }: Right
 
   return (
     <div className="xl:col-span-4 max-h-[calc(100vh-200px)] relative">
-      {/* Close Button */}
+      {}
       <button
         onClick={handleClose}
         className="absolute -left-10 top-0 bg-[#659EB3] hover:bg-[#5088a3] text-white p-2 rounded-l-lg transition-all duration-200 flex items-center justify-center"

@@ -30,6 +30,7 @@ export function LeftPanel({ aircrafts, onAircraftClick, onClose }: LeftPanelProp
 
   return (
     <section className="xl:col-span-3 relative h-full" aria-labelledby="aircraft-list-title">
+      {}
       <button
         onClick={onClose}
         className="hidden xl:flex absolute -right-10 top-4 bg-gradient-to-br from-[#659EB3] to-[#5088a3] hover:from-[#5088a3] hover:to-[#3f7a94] text-white p-2.5 rounded-r-xl transition-all duration-300 items-center justify-center z-50 shadow-lg hover:shadow-2xl hover:scale-110"
@@ -39,6 +40,7 @@ export function LeftPanel({ aircrafts, onAircraftClick, onClose }: LeftPanelProp
         <X className="w-5 h-5" />
       </button>
       
+      {}
       <button
         onClick={onClose}
         className="xl:hidden absolute right-2 top-2 z-10 bg-[#659EB3] hover:bg-[#5088a3] text-white p-2 rounded-full transition-all duration-200 flex items-center justify-center shadow-lg"
@@ -48,7 +50,7 @@ export function LeftPanel({ aircrafts, onAircraftClick, onClose }: LeftPanelProp
       </button>
       
       <Card className="h-full flex flex-col shadow-2xl border-0 bg-gradient-to-b from-white to-[#FFFCEF] rounded-2xl overflow-hidden">
-        {/* Premium Header */}
+        {}
         <CardHeader className="pb-4 border-b-2 border-[#659EB3]/15 bg-gradient-to-r from-[#659EB3]/8 via-transparent to-[#8B7B8E]/8 backdrop-blur-sm">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2.5 bg-gradient-to-br from-[#659EB3] to-[#5088a3] rounded-xl shadow-md transform transition-transform hover:scale-110">
@@ -73,6 +75,7 @@ export function LeftPanel({ aircrafts, onAircraftClick, onClose }: LeftPanelProp
             </div>
           </div>
           
+          {}
           <div className="relative group">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#659EB3]/40 group-focus-within:text-[#659EB3]">
               <Search className="w-4 h-4" />
@@ -88,6 +91,7 @@ export function LeftPanel({ aircrafts, onAircraftClick, onClose }: LeftPanelProp
           </div>
         </CardHeader>
 
+        {}
         <CardContent className="flex-1 overflow-hidden p-0 flex flex-col">
           <div className="flex-1 overflow-y-auto custom-scrollbar">
             {filteredAircrafts.length > 0 ? (
@@ -111,6 +115,7 @@ export function LeftPanel({ aircrafts, onAircraftClick, onClose }: LeftPanelProp
             )}
           </div>
 
+          {}
           <div className="border-t-2 border-[#659EB3]/15 bg-gradient-to-r from-[#659EB3]/8 via-transparent to-[#8B7B8E]/8 px-4 py-3.5 backdrop-blur-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -136,6 +141,7 @@ export function LeftPanel({ aircrafts, onAircraftClick, onClose }: LeftPanelProp
         </CardContent>
       </Card>
 
+      {}
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;
